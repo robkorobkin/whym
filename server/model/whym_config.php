@@ -22,7 +22,13 @@
 				"password" => "root",
 				"database" => "whym"
 			);
-			$config["facebook"]["appId"] = '583531605136818';
+			$config["facebook"] = array(
+				"appId" => '583531605136818',
+				'perms' => 'email,user_friends,user_about_me,user_location, user_birthday, manage_pages'
+			);
+			$config["api"] = array(
+				"admin_path" => 'http://www.localhost.com/whym/app/admin/server/whym_admin.php'
+			);
 		break;
 	
 		// development environment configuration

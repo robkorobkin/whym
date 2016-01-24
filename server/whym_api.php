@@ -1,9 +1,10 @@
 <?php
 	
 	
-	require_once("whym-config.php");
-	require_once("server/rkdatabase.php");
-	require_once("server/whym_api.php");
+	require_once("../../whym-config.php");
+	require_once("../../shared/server/rkdatabase.php");
+	require_once("../../shared/server/whym_api.php");
+	require_once("whym_admin_api.php");
 
 
 
@@ -16,7 +17,9 @@
 
 ///////////////////////////////////
 	
-	$api = new whymAPI($whym_config);
+	$api = new whymAdminAPI($whym_config);
+
+	
 
 	// LOAD STATIC ASSETS
 	if(isset($_GET['lib'])) {
