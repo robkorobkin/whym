@@ -1,37 +1,46 @@
 <?php
+
+	if(!isset($_REQUEST['app'])){
+		exit("What app are we in?");	
+	}
+	global $app;
+	$app = $_REQUEST['app'];
+
 	
 	
-	require_once("../../whym-config.php");
-	require_once("../../shared/server/rkdatabase.php");
-	require_once("../../shared/server/whym_api.php");
-	require_once("whym_admin_api.php");
-
-
-
-		
-
-
+	require_once("model/whym_config.php");
+	require_once("model/framework/rkdatabase.php");
+	require_once("model/whym_model.php");
+	
 
 
 
 
 ///////////////////////////////////
 	
-	$api = new whymAdminAPI($whym_config);
+	$model = new whymModel($whym_config);
 
 	
 
 	// LOAD STATIC ASSETS
 	if(isset($_GET['lib'])) {
+
+		$library = $_GET['lib'];
+		
 	
-		switch($_GET['lib']) {
+		switch($library) {
 			
 			case "js" : 
-				$api -> printJS();
+				header('Content-type: text/javascript');
+				echo 'var dictionary=' . json_encode($whym_config['dictionary']) . ';';
+				echo 'var whym_settings = ' . json_encode($whym_config['client']) . ';';
+				echo file_get_contents('../client/shared/sharedObjects.js');
+				echo file_get_contents('../client/' . $app . '/whym_' . $app . '.js');
 			break;
 			
 			case "css" : 
-				$api -> printCSS();
+				header('Content-type: text/css');
+				echo file_get_contents('../client/' . $app . '/whym_' . $app . '.css');
 			break;
 
 		}
@@ -41,20 +50,24 @@
 
 
 	$request = $_POST;
-	$api -> request = $request;
+	$model -> request = $request;
 	$verb = $request['verb'];
 	
+
+	// bounce users who aren't logged in
 	$requiresLogin = ($verb != 'loginUser');
-	
-	
-	$isLoggedIn = (isset($_SESSION['uid']) && isset($request['uid']) && $_SESSION['uid'] == $request['uid']);
-	
-	if( $requiresLogin && !$isLoggedIn){
-		$response['error'] = "logged out";
-		echo json_encode($response);
-		exit();
+	if( $requiresLogin ){
+		$model -> validateUser();
 	}
+
+
+
+	// if invoking an administrative method, make sure they have permission
+	if(strpos($verb, "Admin") === 0){
+		if(!isset($request['organizationId'])) $model -> handleError("No organization selected");
+		$model -> checkAdmin($request['uid'], $request['organizationId']);
+	}
+
 	
-	$api -> uid = $_SESSION['uid'];
-	$response = $api -> $verb();
+	$response = $model -> $verb();
 	echo json_encode($response);

@@ -6,6 +6,7 @@
 	session_start();
 
 	
+	global $app;
 
 
 	$config = array();
@@ -22,12 +23,17 @@
 				"password" => "root",
 				"database" => "whym"
 			);
-			$config["facebook"] = array(
-				"appId" => '583531605136818',
-				'perms' => 'email,user_friends,user_about_me,user_location, user_birthday, manage_pages'
-			);
-			$config["api"] = array(
-				"admin_path" => 'http://www.localhost.com/whym/app/admin/server/whym_admin.php'
+			
+			$config['facebook_secret'] = '71304a0e6f282f03280c799f10e5238e';
+
+			$config["client"] = array(
+				'base_url' => 'http://www.localhost.com/biz/whym/app',
+				"facebook" => array(
+					"appId" => '583531605136818',
+				),
+				"api" => array(
+					"admin_path" => 'http://www.localhost.com/whym/app/admin/server/whym_admin.php'
+				)
 			);
 		break;
 	
@@ -42,9 +48,21 @@
 			$config["facebook"]["appId"] = '';
 		break;
 
-		
 	}
-		
+
+	if($app == 'admin') $config['client']['base_url'] .= '/admin.php';
+
+	
+	// authentication url
+	$perms = 'email,user_friends,user_about_me,user_location, user_birthday, pages_show_list';
+	$config['client']['facebook']['perms'] = $perms;
+
+	$config['client']['facebook']['auth_url'] = 
+		'https://www.facebook.com/dialog/oauth?client_id=' . $config['client']['facebook']['appId']
+		. '&redirect_uri=' . urlencode($config['client']['base_url'])
+		. '&scope=' . $perms;
+
+
 	$config['dictionary']['us_state_abbrevs_names'] = array(
 		'AL'=>'ALABAMA',
 		'AK'=>'ALASKA',
@@ -115,10 +133,6 @@
 		'11' => 'NOV',
 		'12' => 'DEC'
 	);
-
-	for($day = 1; $day <= 31; $day++) 	$config['dictionary']['days'][] = $day;
-	
-	for($year = 2015; $year >= 1915; $year--) $config['dictionary']['years'][] = $year;
 	
 	global $whym_config;
 	$whym_config = $config;
