@@ -42,7 +42,7 @@
 		}
 		
 		function get_FromObj($where, $table, $isList = false){
-			foreach($where as $k => $v) $whereStrs[] = $k . '=' . $v;
+			foreach($where as $k => $v) $whereStrs[] = $k . '="' . $v . '"';
 			$sql = 'select * from ' . $table . ' where ' . implode(' AND ', $whereStrs);
 			if($this -> debugMode) echo $sql . $this -> _linebreak();
 			if(!$isList) return $this -> get_row($sql);
@@ -95,7 +95,6 @@
 			
 			if($this -> debugMode) echo $sql . $this -> _linebreak();
 
-
 			// run query
 			$this -> run_query($sql);		
 			
@@ -105,7 +104,7 @@
 		}
 
 
-		function updateOrCreate($update, $table, $where){
+		function updateOrCreate($update, $table, $where, $primaryKey = false){
 			
 			// look for it?
 			$row = $this -> get_FromObj($where, $table);
@@ -114,12 +113,16 @@
 			if(count($row) == 0){
 				$newObject = $update;
 				foreach($where as $k => $v) $newObject[$k] = $v;
-				$this -> insert($newObject, $table);
+				return $this -> insert($newObject, $table);
 			}
 		
 			// otherwise, update it
 			else {
+				foreach($update as $k => $v){
+					$row[$k] = $v;
+				}
 				$this -> update($update, $table, $where);
+				if($primaryKey) return $row[$primaryKey];
 			}
 			
 		}

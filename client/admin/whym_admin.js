@@ -30,6 +30,14 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 			$scope.org = false; 
 
 
+			// INIT DROPDOWN.JS
+			$(".select").dropdown({ 
+				"autoinit" : ".select",
+				"optionClass": "withripple"
+			});
+			
+
+			// WHAT HAPPENS WHEN 
 			$scope.rootController.loadLoginScreen = function(){
 				this.loadView('login');
 				$scope.showSidebar = false;
@@ -247,28 +255,124 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 
 		$scope.updateController = {
 
+			events : [],
+
+			feed : [],
+
 			init : function(){
+
 				this.newUpdate = {
 					title: '',
-					body : ''
+					body : '',
+					event : false
 				};
 
 				this.needs = [];
 
-				this.updateLog = [];
 			},
 
-			makePost : function(){
-				Utilities.validate(this.newUpdate, ['title', 'body'], this.needs);
+			load : function(){
+				$scope.rootController.loadView('loading');
+
+				this.mode = 'editor';
+				this.update_type = 'Manual';
+
 				var request = {
-					post : this.newUpdate,
-					verb  : 'makePost'
+					verb : "AdminGetUpdates"
+				}
+
+				$scope.apiClient.postData(request, function(response){
+					$scope.updateController.loadUpdates(response.updates);
+				});
+				
+			},
+
+			loadUpdates : function(updates){
+				$scope.org.updates = updates;
+				$scope.org.updatesViewset = [[]];
+				var rowIndex = 0;
+
+				for(var index in updates){
+					var update = updates[index];
+					if(index % 2 == 0) {
+						rowIndex++;
+						$scope.org.updatesViewset[rowIndex] = [];
+					}
+					$scope.org.updatesViewset[rowIndex].push(update);
+				}
+
+				$scope.updateController.init();
+				$scope.rootController.loadView('orgUpdates', 'view');
+			},
+
+			postUpdate : function(){
+				Utilities.validate(this.newUpdate, ['title', 'body'], this.needs);
+				this.newUpdate.update_type = this.update_type;
+				this.update_type = 'Manual';
+				var request = {
+					newUpdate : this.newUpdate,
+					verb  : 'AdminPostUpdate'
 				}
 				$scope.apiClient.postData(request, function(response){
-					$scope.updateController.init();
-					$scope.updateController.updateLog = response.updates;
+					$scope.updateController.loadUpdates(response.updates);
 				})
-			}
+			},
+
+			getUpdatesFromFB : function(){
+
+				var update_type = this.update_type;
+
+				if(update_type == 'Manual'){
+					this.init();
+					this.mode = 'editor';
+					return;
+				}
+
+				this.mode = 'loading';
+
+				var request = {
+					update_type : update_type,
+					verb  : 'AdminGetUpdatesFromFB'
+				}
+				$scope.apiClient.postData(request, function(response){
+					switch(update_type){
+						case "Event" :
+							$scope.updateController.init();
+							$scope.updateController.events = response.events;
+							$scope.updateController.mode = 'events';
+						break;
+						case "Page Feed" :
+							$scope.updateController.init();
+							$scope.updateController.feed = response.feed;
+							$scope.updateController.mode = 'feed';
+						break;
+					}
+					
+				})	
+			},
+
+			selectEvent : function(event){
+				this.newUpdate.event = event;
+				$scope.updateController.mode = 'editor';
+			},
+
+			cancelEvent : function(event){
+				this.init();
+				this.newUpdate.event = false;
+				$scope.updateController.mode = 'events';
+			},
+
+			selectPost : function(post){
+				this.newUpdate.body = post.body;
+				this.newUpdate.url = post.url;
+				$scope.updateController.mode = 'editor';
+			},
+
+			cancelPost : function(event){
+				this.init();
+				$scope.updateController.mode = 'feed';
+			},
+
 		}
 
 		$scope.init();

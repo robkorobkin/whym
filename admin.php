@@ -9,6 +9,11 @@
 		<!-- SHARED FRAMEWORK -->
 		<?php include('client/shared/head.php'); ?>
 
+		<!-- ADMIN-SPECIFIC -->
+		<!-- Dropdown.js -->
+		<link href="//cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.css" rel="stylesheet">
+		<script src="https://cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.js"></script>
+		
 		<!-- APP -->
 		<script src="server/whym_api.php?lib=js&app=admin"></script>
 		<link href="server/whym_api.php?lib=css&app=admin" rel="stylesheet" type="text/css" />
@@ -33,7 +38,7 @@
 					</div>
 					<div class="menu">
 						<a ng-click="organizationController.getPeople()" ng-class="{active: view == 'orgPeople'}">People</a>
-						<a ng-click="rootController.loadView('orgUpdates')" ng-class="{active: view == 'orgUpdates'}">Updates</a>
+						<a ng-click="updateController.load()" ng-class="{active: view == 'orgUpdates'}">Updates</a>
 						<a ng-click="organizationController.loadPhotos()" ng-class="{active: view == 'orgPhotos'}">Photos</a>
 						<a ng-click="rootController.loadView('orgProfile')" ng-class="{active: view == 'orgProfile'}">Profile</a>
 					</div>
@@ -180,22 +185,130 @@
 				</div>
 
 				<!-- ORGANIZATION - UPDATES-->
-				<div ng-if="view == 'orgUpdates'" class=" primaryFrame updateManager">
-					<div class="col-sm-6">
-						<div class="form-group" style="margin: 0" ng-class="{'has-error': updateController.needs.title}">
-							<label class="control-label" for="newUpdate_title" >Title</label>
-							<input class="form-control" id="newUpdate_title" type="text" ng-model="updateController.newUpdate.title" ng-required>
+				<div ng-if="view == 'orgUpdates'" class="primaryFrame updateManager">
+					<div ng-if="screen=='input'">
+
+						<!-- MODE SELECTOR -->
+						<div class="form-group">
+			                <label for="update_type" class="control-label">Update Type</label>
+			                <select id="update_type" class="form-control select" ng-model="updateController.update_type" ng-change="updateController.getUpdatesFromFB()">
+								<option>Manual</option>
+								<option>Event</option>
+								<option>Page Feed</option>
+							</select>
 						</div>
-						<div class="form-group" style="margin: 0" ng-class="{'has-error': updateController.needs.body}">
-							<label class="control-label" for="newUpdate_body" >What's on your mind?</label>
-							<textarea class="form-control" id="newUpdate_body" ng-model="updateController.newUpdate.body" ng-required></textarea>
+
+						<!-- PRIMARY FORM INPUT -->
+						<div class="primaryFormInput" ng-if="updateController.mode == 'editor'">
+							<div class="cancel back" ng-if="updateController.update_type == 'Page Feed'">
+								<a ng-click="updateController.cancelPost()">Back</a>
+							</div>
+
+							
+							<div class="updateSelectHeader">Update your followers:</div>
+
+							<div class="editorFrame clearfix">
+
+								<div class="form-group" style="margin: 0" ng-class="{'has-error': updateController.needs.title}">
+									<label class="control-label" for="newUpdate_title" >Title</label>
+									<input class="form-control" id="newUpdate_title" type="text" ng-model="updateController.newUpdate.title" ng-required>
+								</div>
+								<div class="form-group" style="margin: 0" ng-class="{'has-error': updateController.needs.body}">
+									<label class="control-label" for="newUpdate_body" >What's on your mind?</label>
+									<textarea class="form-control" id="newUpdate_body" ng-model="updateController.newUpdate.body" ng-required
+										ng-class="{'eventText': updateController.newUpdate.event}"></textarea>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label" for="newUpdate_url" >URL \ LINK</label>
+									<input class="form-control" id="newUpdate_url" type="text" ng-model="updateController.newUpdate.url" ng-required>
+								</div>
+
+								<a class="btn btn-raised btn-success" ng-click="updateController.postUpdate()">POST</a>
+							</div>
+
+							<!-- EVENT PREVIEW -->
+							<div ng-if="updateController.newUpdate.event">
+								<div class="updateSelectHeader">Event:</div>
+
+								<div class="event standalone clearfix">
+									<div class="col-sm-3 imgFrame" >
+										<img ng-src="//graph.facebook.com/{{updateController.newUpdate.event.event_FbId}}/picture?height=268&width=268" />
+									</div>
+									<div class="col-sm-9">
+										<div class="title">{{updateController.newUpdate.event.event_title}}</div>
+										<div class="location">{{updateController.newUpdate.event.event_location}}</div>
+										<div class="date">{{updateController.newUpdate.event.event_dateStr}}</div>
+									</div>
+								</div>
+								<div class="cancel">
+									<a ng-click="updateController.cancelEvent()">Cancel</a>
+								</div>
+							</div>
+						</div>							
+
+						<!-- EVENT SELECTOR -->
+						<div ng-if="updateController.mode == 'events'">
+
+							<div class="updateSelectHeader">Select an event to share on Whym:</div>
+
+							<div class="updateSelectFrame">
+								<div ng-repeat="event in updateController.events" class="event clearfix" ng-click="updateController.selectEvent(event)">
+									<div class="col-sm-3 imgFrame" >
+										<img ng-src="//graph.facebook.com/{{event.event_FbId}}/picture?height=268&width=268" />
+									</div>
+									<div class="col-sm-9">
+										<div class="title">{{event.event_title}}</div>
+										<div class="location">{{event.event_location}}</div>
+										<div class="date">{{event.event_dateStr}}</div>
+									</div>
+								</div>
+							</div>
 						</div>
+
+						<!-- POST SELECTOR -->
+						<div ng-if="updateController.mode == 'feed'">
+							<div class="updateSelectHeader">Select a post to share on Whym:</div>
+
+							<div class="updateSelectFrame">
+								<div ng-repeat="post in updateController.feed" class="post" ng-click="updateController.selectPost(post)">
+									{{post.body}}
+								</div>
+							</div>
+						</div>
+
+						<!-- LOADING -->
+						<div ng-if="updateController.mode == 'loading'">
+							<p>Loading...</p>
+							<img src="client/shared/images/loading.gif" />
+						</div>
+
 						
-						<a class="btn btn-raised btn-success" ng-click="updateController.makePost()">POST</a>
 					</div>
-					<div class="col-sm-6">
+					<div class="updateList"  ng-if="screen=='view'">
+						<div ng-repeat="row in org.updatesViewset" class="clearfix">
+							<div ng-repeat="update in row" class="col-sm-6">
+								<div class="update">
+									<div class="title">{{update.title}}</div>
+									<div class="body">{{update.body}}
 
-
+										<span ng-if="update.url != ''"> - 
+											<a href="{{update.url}}">LINK</a>
+										</span>
+									</div>
+									<div class="event standalone clearfix" ng-if="update.event">
+										<div class="col-sm-3 imgFrame" >
+											<img ng-src="//graph.facebook.com/{{update.event.event_FbId}}/picture?height=268&width=268" />
+										</div>
+										<div class="col-sm-9">
+											<div class="title">{{update.event.event_title}}</div>
+											<div class="location">{{update.event.event_location}}</div>
+											<div class="date">{{update.event.event_dateStr}}</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 

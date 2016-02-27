@@ -24,17 +24,15 @@
 			extract($this -> request);
 
 			$user = $this -> _getUserByUid($uid);
-						
+
 			if($user['fbAccessToken'] != $access_token || $access_token == '') {
 				$response['error'] = "logged out";
 				echo json_encode($response);
 				exit();
 			}
 
-
 			$this -> uid = (int) $uid;
 			$this -> user = $user;
-
 		}
 
 
@@ -209,8 +207,6 @@
 			extract($search_parameters);
 
 
-	
-
 			// BUILD WHERE STRING
 			$where = '';
 			if(isset($mode) && $mode == "mine"){
@@ -330,6 +326,12 @@
 			);
 		}
 		
+
+		/*************************************************************************************************
+		*	PHOTOS
+		*
+		*************************************************************************************************/
+
 		function AdminGetPhotosForOrg(){
 			extract($this -> request);
 			$where = array('orgId' => $organizationId);
@@ -386,6 +388,166 @@
 			}
 			return $this -> AdminGetPhotosForOrg();
 		}
+
+
+		/*************************************************************************************************
+		*	UPDATES
+		*
+		*************************************************************************************************/
+
+		function AdminPostUpdate(){
+			$this -> validateInput(array('newUpdate'));
+			extract($this -> request);
+
+			$event = $newUpdate['event'];
+			unset($newUpdate['event']);
+
+
+			// SAVE UPDATE
+			$newUpdate['status'] = 'active';
+			$newUpdate['orgId'] = $organizationId;
+			if(!isset($newUpdate['updateId'])){
+				$updateId = $this -> db -> insert($newUpdate, 'updates');
+			}
+			else {
+
+				// IF YOU'RE EDITING, MAKE SURE IT EXISTS...
+				$where = array('updateId' => $updateId);
+				$oldRow = $this -> db -> get_FromObj($where, 'updates');
+				if(count($oldRow) == 0 || $oldRow['orgId'] != $organizationId) {
+					$this -> handleError("The update you are trying to edit either does not exist or you do not have access to it.");
+				}
+
+				// AND SAVE
+				$this -> db -> update($newUpdate, 'updates', $where);
+			}
+
+
+			// HANDLE UPDATES ASSOCIATED WITH EVENTS
+			if($event != "false"){
+
+				// INSERT OR UPDATE EVENT
+				unset($event['$$hashKey']);
+				$event['org_id'] = $organizationId;
+				$where = array("event_FbId" => $event['event_FbId']);
+				$eventId = $this -> db -> updateOrCreate($event, 'events', $where, "event_id");
+
+
+				// UPDATE POST TO LINK TO EVENT
+				$where = array('updateId' => $updateId);
+				$update = array("event_id" => $eventId);
+				$this -> db -> update($update, 'updates', $where);
+			}
+
+
+			
+			
+
+			return $this -> AdminGetUpdates();
+		}
+
+
+		function AdminGetUpdates(){
+			extract($this -> request);
+			$where = array(
+				"orgId" => $organizationId,
+				"status" => "active"
+			);
+
+			$sql = 'SELECT * FROM updates u 
+					LEFT JOIN events e ON u.event_id = e.event_id
+					WHERE u.orgId=' . $organizationId . ' AND u.status = "active"
+					ORDER BY u.updateId DESC LIMIT 100';
+
+
+			// PROCESS UPDATES LIST INTO COMPLEX DATA OBJECTS
+			$updatesRaw = $this -> db -> get_results($sql);
+			$updates = array();
+			foreach($updatesRaw as $index => $updateRaw){
+				$update = array();
+				foreach($updateRaw as $field => $value){
+					if(strpos($field, "event_") !== 0){
+						$update[$field] = $value;
+					}
+					else $update['event'][$field] = $value;
+				}
+				if($updateRaw['event_id'] == null) unset($update['event']);
+				$updates[] = $update;
+			}
+
+			return array(
+				"updates" => $updates
+			);
+		}
+
+		function AdminGetUpdatesFromFB(){
+			$this -> validateInput(array("update_type"));
+			extract($this -> request);
+
+			$org = $this -> _getOrganizationByOrganizationId($organizationId);
+			$organizationFbId = $org['organizationFbId'];
+
+
+			switch($update_type){
+				case "Page Feed" :
+					$url = "https://graph.facebook.com/" . $organizationFbId . "/posts?access_token=" . $access_token;
+					$response = file_get_contents($url);
+					$feedRaw = json_decode($response, true);
+					$response = array();
+					foreach($feedRaw['data'] as $feedItem){
+						if(!isset($feedItem['message'])) continue;
+
+						$message = $feedItem['message'];
+						$url = getFirstUrl($message);
+						$message = removeUrlsFromString($message);
+
+						$update = array(
+							"body" => $message,
+							"url" => $url
+						);
+						$response[] = $update;
+					}
+					return array(
+						"feed" => $response
+					);
+
+				break;
+
+				case "Event" :
+					$url = "https://graph.facebook.com/" . $organizationFbId . "/events?access_token=" . $access_token;
+					$response = file_get_contents($url);
+					$eventsRaw = json_decode($response, true);
+					$response = array();
+
+					foreach($eventsRaw['data'] as $event){
+					
+						$dateObj = DateTime::createFromFormat(DateTime::ISO8601, $event['start_time']);
+
+						$event = array(
+							"event_title" => $event['name'],
+							"event_location" => $event['place']['name'],
+							"event_dateStr" => $dateObj -> format("g:ia - F j, Y"),
+							"event_dateISO" => $event['start_time'],
+							"event_FbId" => $event['id']
+						);
+						$response[] = $event;
+					}
+
+					return array(
+						"events" => $response
+					);
+				break;
+
+				default:
+					$this -> handleError("Requested illegal update type.");
+				break;
+			}
+
+			
+
+			
+		}
+
 
 		/************************************************************************************************
 		*	FACEBOOK
@@ -652,11 +814,47 @@
 	// UTILITIES
 
 	// remove urls from strings (cleans txt and captions from FB)
-	function removeUrlsFromString($url) {
- 		$U = explode(' ',$url);
-		foreach($U as $k=>$u){
-			if(stristr($u,'http')) unset($U[$k]);
-		}
-		return implode(' ',$U);
+	function getFirstUrl($str) {
+ 		$U = explode('http', $str);
+ 		if(count($U) == 1) return "";
+ 		foreach($U as $k => $link){
+ 			if($k == 0) continue;
+ 			$u = explode(' ', $link);
+ 			$link = $u[0];
+ 			return 'http' . $link;
+ 		}
 	}
 
+
+	function removeUrlsFromString($str) {
+ 		$U = explode('http', $str);
+ 		if(count($U) == 1) return $str;
+ 		$newStr = '';
+ 		foreach($U as $k => $chunk){
+ 			if($k == 0) {
+ 				$newStr .= $chunk;
+ 				continue;
+ 			}
+ 			$u = explode(' ', $chunk);
+ 			unset($u[0]);
+ 			foreach($u as $txt){
+ 				$newStr .= ' ' . $txt;
+ 			}
+ 		}
+ 		return $newStr;
+	}
+
+	function unitTestUrlFunctions(){
+		$test_strings = array(
+			"http://www.google.com is a great site.",
+			"I lovehttp://www.google.com because it's a great site.",
+			"I lovehttp://www.google.com because it's a great site, so's http://www.google.com",
+			"I lovehttp://www.google.com"
+		);
+
+		foreach($test_strings as $str){
+			echo $str . "<br />";
+			echo "First Link: " . getFirstUrl($str) . "<br />";
+			echo "URL Free: " . removeUrlsFromString($str) . "<br /><br />";
+		}
+	}
