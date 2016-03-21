@@ -61,6 +61,7 @@
 			
 			// if it's a facebook user, get uid
 			$uid = $this -> getUserFromFacebook($access_token);
+			$this -> uid = $uid;
 			$this -> updateFriends($uid, $access_token);
 			
 			// PUT OTHER LOGIN MODES HERE
@@ -73,6 +74,14 @@
 			$this -> db -> update($update, "users", $where);
 			
 			$user = $this -> _getUserByUid($uid);
+
+			// if we're in the public world, get the user's orgs onload
+			if($app == "public"){
+				$search_params['mode'] = 'mine';
+				$organizations = $this -> _getOrganizationsForUser($search_params);
+				
+				$user['organizations'] = $organizations;
+			}
 			
 			
 			// if we're in the admin world, figure out which orgs the admin has access to
@@ -152,11 +161,18 @@
 			unset($user['friendsList']);
 			unset($user['unreadChatsCount']);
 			unset($user['fbAccessToken']);
-			
+			unset($user['organizations']);
+			unset($user['middle_name']);	// control which fields we get from facebook?
 
-			if($user['bio'] != ''){
+
+
+			if(isset($user['availability'])){
 				$user['isActive'] = 1;
 				$user['isNew'] = 0;
+
+				// process availability
+
+				unset($user['availability']);
 			}
 
 			$where = array('uid' => (int) $user['uid']);
@@ -201,35 +217,93 @@
 			return $relationship;
  		}
 
-
 		function searchForOrganizations(){
 			extract($this -> request);
-			extract($search_parameters);
-
-
-			// BUILD WHERE STRING
-			$where = '';
-			if(isset($mode) && $mode == "mine"){
-				$where = ' (s.status = "signed up" OR s.status = "admin")';
-			}
-			if($where != '') $where = ' AND ' . $where;
-
-			$fields = 'o.*';
-			$sql = "SELECT $fields, s.status FROM organizations o
-					LEFT JOIN signups s ON s.organizationId = o.organizationId AND s.uid = " . $this -> uid .  
-					" WHERE o.organizationStatus = 'active' " . $where .
-					" LIMIT 40";
-
-			//echo $sql; exit();
-
-			// add search parameters
-			$orgs = $this -> db -> get_results($sql);
-
+			$this -> validateInput(array("search_parameters"));
 			return array(
-				"organizations" => $orgs
+				"organizations" => $this -> _getOrganizationsForUser($search_parameters)
 			);
 		}
 
+		function _getOrganizationsForUser($search_parameters){
+			extract($search_parameters);
+
+			// BUILD WHERE STRING
+			$where = '';
+			$joinBoolean = '';
+			$mode = isset($mode) ? $mode : false;
+			if($mode == "mine"){
+				$joinBoolean .= ' (s.status = "signed up" OR s.status = "admin")';
+				$where .= "s.status IS NOT null";
+			}
+			if($mode == "searchNew"){
+				$where .= ' ( (s.status <> "signed up" AND s.status <> "admin") OR s.status IS null)';
+			}
+			if($where != '') $where = ' AND ' . $where;
+			if($joinBoolean != '') $joinBoolean = ' AND ' . $joinBoolean;
+
+			// query
+			$fields = 'o.*';
+			$sql = "SELECT $fields, s.status, s.lastChecked FROM organizations o
+					LEFT JOIN signups s ON s.organizationId = o.organizationId AND s.uid = " . $this -> uid .  $joinBoolean .
+					" WHERE o.organizationStatus = 'active' " . $where .
+					" LIMIT 40";
+
+			$organizations = $this -> db -> get_results($sql);
+
+			//echo $sql; exit;
+
+			// get inbox counts
+			if($mode == "mine"){
+				foreach($organizations as $k => $o){
+					$sql = 	'SELECT COUNT(*) FROM updates WHERE orgId=' . (int) $o['organizationId'] . 
+							' AND publish_date > "' . $o['lastChecked'] . '" AND status="active"';
+					$organizations[$k]['newUpdates'] = $this -> db -> get_var($sql);
+				}
+			}
+			
+			return $organizations; 	
+
+		}
+
+		function getOrganization(){
+			$this -> validateInput(array("organizationId", "client_time"));
+			extract($this -> request);
+			$orgId = (int) $organizationId;
+
+
+			// fetch organization
+			$sql = 'SELECT * FROM organizations where organizationId=' . $orgId;
+			$organization = $this -> db -> get_row($sql);
+			if(!$organization) $this -> handleError("Sorry.  No organization found for that ID");
+
+			// get photos
+			$sql = 'SELECT * FROM photos where orgId=' . $orgId;
+			$organization['photos'] = $this -> db -> get_results($sql);
+
+			// get updates
+			$sql = 'SELECT * FROM updates u
+					LEFT JOIN events e ON u.event_id = e.event_id
+					WHERE u.orgId = ' . $orgId . 
+					' ORDER BY u.publish_date DESC';
+
+			$organization['updates'] = $this -> _parseUpdatesList($this -> db -> get_results($sql));
+
+
+			// update user
+			$update = array("lastChecked" => $client_time);
+			$where = array(
+				"uid" => $this -> uid,
+				"organizationId" => $organizationId
+			);
+			$this -> db -> update($update, "signups", $where);
+
+
+			return array(
+				"organization" => $organization
+			);
+
+		}
 
 
 
@@ -334,9 +408,9 @@
 
 		function AdminGetPhotosForOrg(){
 			extract($this -> request);
-			$where = array('orgId' => $organizationId);
+			$sql = 'SELECT * FROM photos where orgId=' . $organizationId . ' ORDER BY photoId DESC';
 			return array(
-				"photos" => $this -> db -> get_FromObj($where, 'photos', true)
+				"photos" => $this -> db -> get_results($sql)
 			);
 		}
 
@@ -406,19 +480,21 @@
 			// SAVE UPDATE
 			$newUpdate['status'] = 'active';
 			$newUpdate['orgId'] = $organizationId;
+			unset($newUpdate['$$hashKey']);
 			if(!isset($newUpdate['updateId'])){
 				$updateId = $this -> db -> insert($newUpdate, 'updates');
 			}
 			else {
 
 				// IF YOU'RE EDITING, MAKE SURE IT EXISTS...
-				$where = array('updateId' => $updateId);
+				$where = array('updateId' => $newUpdate['updateId']);
 				$oldRow = $this -> db -> get_FromObj($where, 'updates');
 				if(count($oldRow) == 0 || $oldRow['orgId'] != $organizationId) {
 					$this -> handleError("The update you are trying to edit either does not exist or you do not have access to it.");
 				}
 
 				// AND SAVE
+				$updateId = $newUpdate['updateId'];
 				$this -> db -> update($newUpdate, 'updates', $where);
 			}
 
@@ -428,7 +504,7 @@
 
 				// INSERT OR UPDATE EVENT
 				unset($event['$$hashKey']);
-				$event['org_id'] = $organizationId;
+				$event['orgId'] = $organizationId;
 				$where = array("event_FbId" => $event['event_FbId']);
 				$eventId = $this -> db -> updateOrCreate($event, 'events', $where, "event_id");
 
@@ -446,14 +522,27 @@
 			return $this -> AdminGetUpdates();
 		}
 
+		function AdminDeleteUpdate(){
+			$this -> validateInput(array('updateId', 'edit_date'));
+			extract($this -> request);
+			
+			// IF YOU'RE EDITING, MAKE SURE IT EXISTS...
+			$where = array('updateId' => $updateId);
+			$oldRow = $this -> db -> get_FromObj($where, 'updates');
+			if(count($oldRow) == 0 || $oldRow['orgId'] != $organizationId) {
+				$this -> handleError("The update you are trying to edit either does not exist or you do not have access to it.");
+			}
+
+			// AND SAVE
+			$oldRow['status'] = 'deleted';
+			$oldRow['edit_date'] = $edit_date;
+			$this -> db -> update($oldRow, 'updates', $where);
+			return array("status" => "success");
+		}
 
 		function AdminGetUpdates(){
 			extract($this -> request);
-			$where = array(
-				"orgId" => $organizationId,
-				"status" => "active"
-			);
-
+			
 			$sql = 'SELECT * FROM updates u 
 					LEFT JOIN events e ON u.event_id = e.event_id
 					WHERE u.orgId=' . $organizationId . ' AND u.status = "active"
@@ -462,21 +551,8 @@
 
 			// PROCESS UPDATES LIST INTO COMPLEX DATA OBJECTS
 			$updatesRaw = $this -> db -> get_results($sql);
-			$updates = array();
-			foreach($updatesRaw as $index => $updateRaw){
-				$update = array();
-				foreach($updateRaw as $field => $value){
-					if(strpos($field, "event_") !== 0){
-						$update[$field] = $value;
-					}
-					else $update['event'][$field] = $value;
-				}
-				if($updateRaw['event_id'] == null) unset($update['event']);
-				$updates[] = $update;
-			}
-
 			return array(
-				"updates" => $updates
+				"updates" => $this -> _parseUpdatesList($updatesRaw)
 			);
 		}
 
@@ -526,7 +602,7 @@
 						$event = array(
 							"event_title" => $event['name'],
 							"event_location" => $event['place']['name'],
-							"event_dateStr" => $dateObj -> format("g:ia - F j, Y"),
+							"event_dateStr" => $dateObj -> format("F j at g:ia"),
 							"event_dateISO" => $event['start_time'],
 							"event_FbId" => $event['id']
 						);
@@ -542,11 +618,31 @@
 					$this -> handleError("Requested illegal update type.");
 				break;
 			}
-
-			
-
-			
 		}
+
+		function _parseUpdatesList($updatesRaw){
+			$updates = array();
+			foreach($updatesRaw as $index => $updateRaw){
+				$update = array();
+				foreach($updateRaw as $field => $value){
+					if(strpos($field, "event_") !== 0){
+						$update[$field] = $value;
+					}
+					else $update['event'][$field] = $value;
+				}
+				if($updateRaw['event_id'] == null) unset($update['event']);
+
+				// PROCESS DATES
+				$update['publish_date'] = parseMysqlToDateString($update['publish_date']);
+				$update['edit_date'] = parseMysqlToDateString($update['edit_date']);
+
+
+				$updates[] = $update;
+			}
+			return $updates;
+		}
+
+			
 
 
 		/************************************************************************************************
@@ -567,7 +663,6 @@
 
 			return $response;
 		}
-
 
 		function getAccessTokenFromCode($fb_code){
 			extract($this -> config);
@@ -623,7 +718,6 @@
 			return $longevity_token;
 		}
 
-
 		function getUserFromFacebook($access_token){
 		
 			// look user up server-side
@@ -678,10 +772,10 @@
 			$newUser['fbid'] = $newUser['id'];
 			unset($newUser['id']);
 			$newUser['dateCreated'] = date("Y-m-d H:i:s");
-		
+			unset($newUser['middle_name']);	// control which fields we get from facebook?
+
 			$uid = $this -> db -> insert($newUser, "users");
-			return $uid;		
-		
+			return $uid;				
 		}
 
 		function updateFriends($userId, $access_token){
@@ -825,7 +919,6 @@
  		}
 	}
 
-
 	function removeUrlsFromString($str) {
  		$U = explode('http', $str);
  		if(count($U) == 1) return $str;
@@ -858,3 +951,15 @@
 			echo "URL Free: " . removeUrlsFromString($str) . "<br /><br />";
 		}
 	}
+
+
+
+	// RANDOM DATE SHIT
+	function parseMysqlToDateString($mysqlDate){
+		if($mysqlDate == '0000-00-00 00:00:00') return '';
+		$date = DateTime::createFromFormat('Y-m-d H:i:s', $mysqlDate);
+		if(!$date) return '';
+		return $date -> format("F j") . ' at ' . $date -> format("g:ia");
+	}
+
+

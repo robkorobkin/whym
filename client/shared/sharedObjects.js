@@ -108,8 +108,10 @@ var sharedObjects = {
 					this.loadView('account', 1);
 				}
 				else {
+					console.log($scope.user);
+
 					// deep load
-					this.loadView('search');
+					$scope.orgNavigator.loadList($scope.user.organizations);
 				}
 			}
 
@@ -248,12 +250,17 @@ var sharedObjects = {
 
 	// ACCOUNT VIEW CONTROLLER
 	acctController : {
+
+		days : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+
+		times : ['morning', 'afternoon', 'evening'],
 		
 		needs : {
 			first_name : false,
 			last_name : false,
 			email : false,
-			bio : false
+			bio : false,
+			phone : false
 		},
 
 		sending: false,
@@ -265,7 +272,7 @@ var sharedObjects = {
 		},
 		
 		loadScreen : function(screenNumber){
-			$scope.loadView('account', screenNumber)
+			$scope.rootController.loadView('account', screenNumber)
 		},
 
 		saveAndProgress : function(){
@@ -275,8 +282,9 @@ var sharedObjects = {
 
 			// validate
 			var validate = {
-				1 : ['first_name', 'last_name', 'email', 'city'],
-				2 : ['bio']
+				1 : ['first_name', 'last_name', 'email', 'city', 'phone'],
+				2 : ['bio'],
+				3 : []
 			}
 			var fields = validate[$scope.screen];
 			if(!Utilities.validate($scope.user, fields, $scope.acctController.needs)) return;
@@ -284,6 +292,11 @@ var sharedObjects = {
 			
 			// save updated user
 			this.sending = true;
+			if($scope.screen == 3){
+				$scope.user.availability = {
+					days : "none"
+				};
+			}
 			var request = {
 				user: $scope.user,
 				verb: 'updateUser'
@@ -298,17 +311,25 @@ var sharedObjects = {
 				$scope.acctController.sending = false;
 				if(wasNew){
 					$scope.screen++;
-					if($scope.screen == 3) {
-						//if()
-						//$scope.organizationController
+					if($scope.screen == 4) {
+						$scope.orgNavigator.searchForOrganizations()
 					}						
 				}
 				else {
-					$scope.loadView('account', 'menu');
+					$scope.rootController.loadView('account', 'menu');
 				}
 			});
-			
-					
+		},
+
+		updateAvailability : function(day, time, fromSwitch){
+			var request = {
+				day : day,
+				time : time,
+				verb : 'updateAvailability'
+			}
+			$scope.apiClient.postData(request, function(response){
+				console.log(response);
+			})
 		}
 	
 	}
@@ -342,5 +363,21 @@ var Utilities = {
 			else needs[field_name] = false;
 		});
 		return goAhead;
+	},
+
+	getNowMysqlTime : function() {
+    	var now = new Date();
+
+        var pad = function(num) {
+            var norm = Math.abs(Math.floor(num));
+            return (norm < 10 ? '0' : '') + norm;
+        };
+    
+	    return now.getFullYear() 
+	        + '-' + pad(now.getMonth()+1)
+	        + '-' + pad(now.getDate())
+	        + ' ' + pad(now.getHours())
+	        + ':' + pad(now.getMinutes()) 
+	        + ':' + pad(now.getSeconds());
 	}
 }

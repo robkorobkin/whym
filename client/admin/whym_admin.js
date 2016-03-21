@@ -5,8 +5,6 @@ var app = angular.module('whymAdminApp', ['LocalStorageModule', 'ui.bootstrap'])
 app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window',  'localStorageService', '$modal',
 	function($scope, $http, $sce, $rootScope, $window, localStorageService, $modal){
 		
-		
-
 		$scope.init = function(){
 
 			// set window-level pointer to app scope
@@ -259,15 +257,24 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 
 			feed : [],
 
+			show_select : true,
+
+			editing : false,
+
 			init : function(){
 
 				this.newUpdate = {
 					title: '',
 					body : '',
-					event : false
+					event : false,
+					publish_date : ''
 				};
 
 				this.needs = [];
+
+				this.editing = false;
+
+				this.show_select = true;
 
 			},
 
@@ -294,11 +301,7 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 
 				for(var index in updates){
 					var update = updates[index];
-					if(index % 2 == 0) {
-						rowIndex++;
-						$scope.org.updatesViewset[rowIndex] = [];
-					}
-					$scope.org.updatesViewset[rowIndex].push(update);
+					update.trustedHtml = $sce.trustAsHtml(update.body.replace(/(?:\r\n|\r|\n)/g, '<br />'));
 				}
 
 				$scope.updateController.init();
@@ -306,16 +309,61 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 			},
 
 			postUpdate : function(){
+
 				Utilities.validate(this.newUpdate, ['title', 'body'], this.needs);
+
 				this.newUpdate.update_type = this.update_type;
+				if('updateId' in this.newUpdate){
+					this.newUpdate.edit_date = Utilities.getNowMysqlTime();
+				}
+				else {
+					this.newUpdate.publish_date = Utilities.getNowMysqlTime();
+				}
+
 				this.update_type = 'Manual';
+				this.show_select = false;
+
+				delete this.newUpdate.trustedHtml;
+
 				var request = {
 					newUpdate : this.newUpdate,
 					verb  : 'AdminPostUpdate'
 				}
+				
 				$scope.apiClient.postData(request, function(response){
 					$scope.updateController.loadUpdates(response.updates);
+
+					// hacky work-around to re-render select box in js plugin
+					$scope.updateController.show_select = true;
+					
+
 				})
+			},
+
+			textChange : function(){
+				var update = this.newUpdate;
+				update.trustedHtml = $sce.trustAsHtml(update.body.replace(/(?:\r\n|\r|\n)/g, '<br />'));	
+			},
+
+			deleteUpdate : function(update){
+				if(!confirm('Are you sure you want to delete this update?')) return;
+				var request = {
+					updateId : update.updateId,
+					edit_date : Utilities.getNowMysqlTime(),
+					verb  : 'AdminDeleteUpdate'
+				}
+				$scope.apiClient.postData(request, function(response){
+					$('#update_' + update.updateId).fadeOut();
+				})	
+			},
+
+			editUpdate : function(update){
+				this.newUpdate = update;
+				if(!('event' in update)) update.event = false;
+				this.show_select = false;
+				this.update_type = 'Manual';
+				this.editing = true;
+				this.mode = 'editor';
 			},
 
 			getUpdatesFromFB : function(){
@@ -342,6 +390,10 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 							$scope.updateController.mode = 'events';
 						break;
 						case "Page Feed" :
+							for(var index in response.feed){
+								var post = response.feed[index];
+								post.trustedHtml = $sce.trustAsHtml(post.body.replace(/(?:\r\n|\r|\n)/g, '<br />'));
+							}
 							$scope.updateController.init();
 							$scope.updateController.feed = response.feed;
 							$scope.updateController.mode = 'feed';
@@ -357,9 +409,24 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 			},
 
 			cancelEvent : function(event){
-				this.init();
+				if(!('updateId' in this.newUpdate)) {
+					console.log(this.newUpdate)
+					this.init();
+				}
 				this.newUpdate.event = false;
 				$scope.updateController.mode = 'events';
+
+				if(this.events.length == 0){
+					this.mode = 'loading';
+					var request = {
+						update_type : 'Event',
+						verb  : 'AdminGetUpdatesFromFB'
+					}
+					$scope.apiClient.postData(request, function(response){
+						$scope.updateController.events = response.events;
+						$scope.updateController.mode = 'events';					
+					});
+				}
 			},
 
 			selectPost : function(post){

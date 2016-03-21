@@ -186,12 +186,54 @@
 
 				<!-- ORGANIZATION - UPDATES-->
 				<div ng-if="view == 'orgUpdates'" class="primaryFrame updateManager">
-					<div ng-if="screen=='input'">
+					
+					<div class="updateList col-sm-6">
+						
+						<div ng-repeat="update in org.updates">
+							<div class="update" id="update_{{update.updateId}}">
+								<div class="topLine clearfix">
+									<div class="date">{{update.publish_date}}</div>
+									<div class="utilities">
+										<i class="glyphicon glyphicon-pencil" ng-click="updateController.editUpdate(update)"></i>
+										<i class="glyphicon glyphicon-trash" ng-click="updateController.deleteUpdate(update)"></i>
+									</div>
+								</div>
+
+								<div class="title">{{update.title}}</div>
+								<div class="body" >
+									<span ng-bind-html="update.trustedHtml"></span>
+									<span ng-if="update.url != ''"> - 
+										<a href="{{update.url}}" target="_blank">LINK</a>
+									</span>
+								</div>
+								<div class="event standalone clearfix" ng-if="update.event">
+									<div class="col-sm-3 imgFrame" >
+										<img ng-src="//graph.facebook.com/{{update.event.event_FbId}}/picture?height=268&width=268" />
+									</div>
+									<div class="col-sm-9">
+										<div class="title">{{update.event.event_title}}</div>
+										<div class="location">{{update.event.event_location}}</div>
+										<div class="date">{{update.event.event_dateStr}}</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+					</div>
+
+
+					<!-- POST EDITOR -->
+					<div class="col-sm-6 updateEditor">
+
+						<h4 ng-click="updateController.init()" ng-if="!updateController.editing">Post Update:</h4>
+						<h4 ng-if="updateController.editing">Edit Update: 
+							<span style="font-size: 11px">( <a ng-click="updateController.init()"> Cancel</a> )</span>
+						</h4>
 
 						<!-- MODE SELECTOR -->
-						<div class="form-group">
-			                <label for="update_type" class="control-label">Update Type</label>
-			                <select id="update_type" class="form-control select" ng-model="updateController.update_type" ng-change="updateController.getUpdatesFromFB()">
+						<div class="form-group"  ng-if="updateController.show_select">
+			                <label for="update_type" class="control-label" style="color: black">Update Type</label>
+			                <select class="form-control select" ng-model="updateController.update_type" ng-change="updateController.getUpdatesFromFB()" id="updateType_selector">
 								<option>Manual</option>
 								<option>Event</option>
 								<option>Page Feed</option>
@@ -216,7 +258,7 @@
 								<div class="form-group" style="margin: 0" ng-class="{'has-error': updateController.needs.body}">
 									<label class="control-label" for="newUpdate_body" >What's on your mind?</label>
 									<textarea class="form-control" id="newUpdate_body" ng-model="updateController.newUpdate.body" ng-required
-										ng-class="{'eventText': updateController.newUpdate.event}"></textarea>
+										ng-class="{'eventText': updateController.newUpdate.event}" ng-change="updateController.textChange()"></textarea>
 								</div>
 
 								<div class="form-group">
@@ -224,7 +266,13 @@
 									<input class="form-control" id="newUpdate_url" type="text" ng-model="updateController.newUpdate.url" ng-required>
 								</div>
 
-								<a class="btn btn-raised btn-success" ng-click="updateController.postUpdate()">POST</a>
+								
+
+								<a class="btn btn-raised btn-success" ng-click="updateController.postUpdate()" ng-if="!updateController.editing">POST</a>
+
+								<a class="btn btn-raised btn-success" ng-click="updateController.postUpdate()" ng-if="updateController.editing">SAVE</a>
+								
+
 							</div>
 
 							<!-- EVENT PREVIEW -->
@@ -271,8 +319,8 @@
 							<div class="updateSelectHeader">Select a post to share on Whym:</div>
 
 							<div class="updateSelectFrame">
-								<div ng-repeat="post in updateController.feed" class="post" ng-click="updateController.selectPost(post)">
-									{{post.body}}
+								<div ng-repeat="post in updateController.feed" class="post" ng-click="updateController.selectPost(post)"
+									 ng-bind-html="post.trustedHtml" >
 								</div>
 							</div>
 						</div>
@@ -284,31 +332,6 @@
 						</div>
 
 						
-					</div>
-					<div class="updateList"  ng-if="screen=='view'">
-						<div ng-repeat="row in org.updatesViewset" class="clearfix">
-							<div ng-repeat="update in row" class="col-sm-6">
-								<div class="update">
-									<div class="title">{{update.title}}</div>
-									<div class="body">{{update.body}}
-
-										<span ng-if="update.url != ''"> - 
-											<a href="{{update.url}}">LINK</a>
-										</span>
-									</div>
-									<div class="event standalone clearfix" ng-if="update.event">
-										<div class="col-sm-3 imgFrame" >
-											<img ng-src="//graph.facebook.com/{{update.event.event_FbId}}/picture?height=268&width=268" />
-										</div>
-										<div class="col-sm-9">
-											<div class="title">{{update.event.event_title}}</div>
-											<div class="location">{{update.event.event_location}}</div>
-											<div class="date">{{update.event.event_dateStr}}</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
 					</div>
 				</div>
 

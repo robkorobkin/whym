@@ -6,15 +6,22 @@
 */
 html 			{ height: 100%; }
 
-body			{ 	margin: 0; font-family: 'Open Sans', sans-serif;  background: #fff; 
-					display: flex; flex-direction: column; height: 100%; overflow: hidden; width: 100%; }
+body			{ 	margin: 0; font-family: 'Open Sans', sans-serif;  background: #e9eaed; 
+					display: flex; flex-direction: column; height: 100%; overflow: hidden; width: 100%; ;}
 a				{ cursor: pointer; }
 img				{ display: block; }
 
 .scrollable{min-height:0;-webkit-box-flex:1;box-flex:1;-webkit-flex:1;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+@media only screen and (min-device-width: 768px) {
+	.scrollable {
+		overflow-y: scroll;		
+	}
+
+}
 
 
-.pagination > .active > a, .pagination > .active > a:focus, .pagination > .active > a:hover, .pagination > .active > span, .pagination > .active > span:focus, .pagination > .active > span:hover {
+.pagination > .active > a, .pagination > .active > a:focus, .pagination > .active > a:hover, .pagination > .active > span, 
+.pagination > .active > span:focus, .pagination > .active > span:hover {
 	background-color: #777;
 	border-color: #eee;
 	color: white;
@@ -23,7 +30,7 @@ img				{ display: block; }
 	color: #777;
 }
 
-
+.mainContent .panel { padding: 10px; }
 
 /* LOADING */
 .loadingMain 			{ 	position: fixed;  height: 100px; top: 50%; margin-top: -50px;
@@ -58,28 +65,42 @@ img				{ display: block; }
 /* MAIN CONTENT */
 .appFrame 				{ flex: 1 1 0;  }
 .mainContent 			{ max-width: 500px; margin: 0 auto;}
-.primaryFrame			{ padding: 16px 16px 0; background: white;}
+.primaryFrame			{ padding: 16px 16px 0;}
 .primaryFrame h2		{ margin-top: 0; font-weight: normal; }
 
 /* EDIT ACCOUNT */
+.accountFrame		{ padding: 15px; }
 #user_bio 			{ display: block; width: 100%; height: 205px; font-size: 12px;}
 
-/* MAKE CHECKIN */
-.checkinImage		{ display: block; margin: 4px auto; max-width: 100%; }
-#newcheckin_message	{ font-size: 12px; height: 75px;}
+
+/* STYLE ACCORDION */
+.scheduleWidget 				{ margin-top: 15px }
+.panel.panel-default > .panel-heading, .panel > .panel-heading { background: white }
+.scheduleWidget .panel			{ padding: 0 }
+.scheduleWidget .panel-body		{ border-top: dashed 1px #ccc !important; }
+.panel-heading 					{ padding: 0; }
+.panel-heading a 				{ padding: 10px 15px; display: block; }
+
+
+
+
 
 /* BROWSE ORGS */
-.listInput 				{ padding: 15px 15px 0; }
-.organizationListFrame 	{ padding: 0 15px; }
-.organizationList		{ min-height: 100%; width: 100%;  }
-.orgResult 				{ padding: 8px 0; border-bottom: dashed 1px #ccc; }
-.orgResult:last-child 	{ border-bottom: none; }
-.orgResult .icon 		{ padding: 8px 16px 8px 16px; }
-.orgResult .icon img	{ border-radius: 50%; width: 60px; }
-.orgResult .text		{ padding: 8px 16px 8px 0; }
-.orgResult .name		{ line-height: 20px; font-size: 15px; }
-.orgResult .info		{ line-height: 20px; font-size: 11px; }
-.orgResult .message		{ line-height: 20px; font-size: 11px; font-style: italic; }
+.listInput 						{ padding: 15px 15px 0; }
+.organizationListFrame 			{ padding: 0 15px; }
+.organizationListFrame .title 	{ color: #ccc; text-transform: uppercase; padding-bottom: 10px }
+.organizationList				{ min-height: 100%; width: 100%;  }
+
+.orgResult 						{ padding: 8px 0; border-bottom: dashed 1px #ccc; }
+.orgResult:last-child 			{ border-bottom: none; }
+.orgResult .icon 				{ padding: 8px 16px 8px 16px; }
+.orgResult .icon img			{ border-radius: 50%; width: 60px; }
+.orgResult .text				{ padding: 8px 16px 8px 0; }
+.orgResult .name				{ line-height: 20px; font-size: 15px; }
+.orgResult .info				{ line-height: 20px; font-size: 11px; }
+.orgResult .message				{ line-height: 20px; font-size: 11px; font-style: italic; }
+
+.orgResult .inboxCount	{ background: red; height: 30px; line-height: 30px; width: 30px; text-align: center; color: white; border-radius: 15px; font-size: 13px; margin-right: 10px }
 
 
 /* PROFILE */
@@ -123,4 +144,33 @@ label .toggle:nth-child(3) { display: none;}
 .personView .bottomLinks 			{ text-align: center; font-size: 11px; padding-bottom: 10px; }
 .personView a 						{ display: block; padding: 5px; }
 .personView .checkin_caption		{ font-size: 12px; font-style: italic; }
+
+
+
+/* UPDATES */
+.updateList 				{  }
+.updateList .update 		{ padding: 8px; position: relative; margin-bottom: 15px; background: white; display: block;}
+.updateList .topLine		{ padding-bottom: 8px }
+.updateList .date			{ color: #9197a3; font-size: 11px; float: left; }
+.updateList .utilities		{ float: right; color: #9197a3; font-size: 12px;}
+.updateList .utilities i	{ cursor: pointer; }
+.updateList i.glyphicon:hover	{ color: black; }
+.updateList .title 			{ font-weight: bold; font-size: 13px; margin-bottom: 3px}
+
+.updateList .body 						{ font-size: 12px; padding-bottom: 5px }
+.updateList .event 						{ padding-top: 15px; margin-top: 15px; border-top: dashed 1px #ccc; color: black; display: block;}
+.updateList .event .imgFrame 			{ padding-right: 10px; width: 70px; float: left;}
+.updateList .event img 					{ width: 100%; height: auto; }
+.updateList .event .event_details 		{ float: left; }
+.updateList .event .location			{ font-size: 12px;}
+
+
+
+/* PHOTOS */
+.photoList 				{ text-align: center; }
+.photoList .photo 		{ padding: 10px; margin-left: 10px; margin-right: 10px; background: white; text-align: center; display: inline-block; max-width: 100%}
+.photoList .photo img	{ max-width: 100%; max-height: 300px; display: inline-block; }
+.photoList .caption		{ font-size: 12px; padding-top: 5px }
+
+
 

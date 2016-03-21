@@ -32,8 +32,8 @@
 	
 		function get_var($sql){
 			$result = $this -> conn -> query($sql);
-			 $row = $result -> fetch_array();
-			 return $row ? $row[0] : false;
+			$row = $result -> fetch_array();
+			return $row ? $row[0] : false;
 		}
 
 		function get_row($sql){

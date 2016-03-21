@@ -75,14 +75,18 @@
 
 				<!-- RESULTS -->
 				<div ng-if="view == 'list'">
-					<div class="listInput">
+					<div class="listInput" ng-if="false">
 						<div class="form-group" style="margin: 0">						 
 							<label class="control-label" for="search_str">Search by name?</label>
 							<input class="form-control" id="search_str" type="text" ng-model="orgNavigator.search_str">
 						</div>
 					</div>
-					<div class="organizationListFrame">
-						<table class="organizationList primaryFrame panel panel-default">
+					<div class="organizationListFrame panel panel-default">
+						<div class="title">
+							<span ng-if="orgNavigator.search_parameters.mode =='searchNew'">Search Results</span>
+							<span ng-if="orgNavigator.search_parameters.mode =='mine'">My Organizations</span>
+						</div>
+						<table class="organizationList primaryFrame ">
 							<tr class="orgResult clearfix row" ng-repeat="org in orgNavigator.orgs"
 								ng-click="orgController.openOrg(org)">
 								<td class="icon">
@@ -93,12 +97,15 @@
 										{{org.organizationName}}
 									</div>
 								</td>
+								<td>
+									<div ng-if="org.newUpdates && org.newUpdates != 0" class="inboxCount">{{org.newUpdates}}</div>
+								</td>
 							</tr>
 							<!-- ... -->
 						</table>
 
 
-						<div ng-if="orgNavigator.orgs.length == 0" style="margin-top: 15px; padding: 10px 10px 5px;">
+						<div ng-if="orgNavigator.orgs.length == 0" class="">
 							<p>There are no organizations that meet your criteria.  Please revise the parameters of your search.</p>
 						</div>
 					</div>
@@ -106,17 +113,17 @@
 
 
 				<!-- ORG -->
-				<div ng-if="view == 'org'" class="organization primaryFrame">
+				<div ng-if="view == 'org'" class="organization primaryFrame ">
 					<div class="header" >
 						<div class="orgTitle">{{org.organizationName}}</div>
 						<ul class="pagination">
-							<li ng-class="{ active : true }"><a>Info</a></li>
-							<li><a>Updates</a></li>
-							<li><a>People</a></li>
+							<li ng-class="{ active : screen == 'info' }" ng-click="orgController.changeMode('info')"><a>Info</a></li>
+							<li ng-class="{ active : screen == 'updates' }" ng-click="orgController.changeMode('updates')"><a> Updates</a></li>
+							<li ng-class="{ active : screen == 'photos' }" ng-click="orgController.changeMode('photos')"><a>Photos</a></li>
 						</ul>
 					</div>
 
-					<div ng-if="screen == 'info' ">
+					<div ng-if="screen == 'info' " class="panel panelDefault">
 						<div class="imgFrame">
 							<img ng-src="//graph.facebook.com/{{org.organizationFbId}}/picture" class="organizationImg" />
 						</div>
@@ -161,17 +168,70 @@
 								<a class="link"  ng-if="org.contact1_Phone != ''" href="tel:{{org.contact1_Phone}}">{{org.contact1_Phone}}</a>
 							</div>
 						</div>
-
-
 					</div>
 
-					
+					<div ng-if="screen == 'updates'" class="updateList">
+						<div ng-repeat="update in org.updates">
+
+							<!-- DEFAULT -->
+							<div class="update panel panel-default clearfix" id="update_{{update.updateId}}" ng-if="!update.event">
+								<div class="topLine clearfix">
+									<div class="date">{{update.publish_date}}</div>
+								</div>
+
+								<div class="title">{{update.title}}</div>
+								<div class="body" >
+									<span ng-bind-html="update.trustedHtml"></span>
+									<span ng-if="update.url != ''"> - 
+										<a href="{{update.url}}" target="_blank">LINK</a>
+									</span>
+								</div>	
+							</div>
+
+							<!-- IF IT'S AN EVENT -->
+							<div ng-if="update.event">
+								<a class="update panel panel-default clearfix" id="update_{{update.updateId}}"  href="{{update.event.url}}" target="_blank">
+									<div class="topLine clearfix">
+										<div class="date">{{update.publish_date}}</div>
+									</div>
+
+									<div class="title">{{update.title}}</div>
+									<div class="body" >
+										<span ng-bind-html="update.trustedHtml"></span>
+										<span ng-if="update.url != ''"> - 
+											<!-- <a href="{{update.url}}" target="_blank">LINK</a>-->
+										</span>
+									</div>
+									<div class="event standalone clearfix">
+										<div class="imgFrame" >
+											<img ng-src="//graph.facebook.com/{{update.event.event_FbId}}/picture?height=268&width=268" />
+										</div>
+										<div class="event_details">
+											<div class="title">{{update.event.event_title}}</div>
+											<div class="location">{{update.event.event_location}}</div>
+											<div class="date">{{update.event.event_dateStr}}</div>
+										</div>
+									</div>
+								</a>
+							</div>
+
+						</div>
+					</div>
+
+					<div ng-if="screen == 'photos'" class="photoList">
+						<div class="photo panel panel-default" ng-repeat="photo in org.photos">
+							<img ng-src="//graph.facebook.com/{{photo.photoFbId}}/picture" />
+							<div class="caption" ng-if="photo.caption != ''">{{photo.caption}}</div>
+						</div>
+					</div>			
 				</div>
 
 
 				<!-- ACCOUNT MANAGEMENT INTERFACE -->
 				<div ng-if="view == 'account'" class=" primaryFrame" style="padding: 16px">
-					<div ng-if="screen == 1">
+
+					<!-- BASIC PROFILE -->
+					<div ng-if="screen == 1" class="panel panelDefault accountFrame">
 						<div class="form-group" style="margin: 0" ng-class="{'has-error': acctController.needs.first_name}">
 							<label class="control-label" for="user_first_name" >First Name</label>
 							<input class="form-control" id="user_first_name" type="text" ng-model="user.first_name" ng-required>
@@ -184,6 +244,11 @@
 						<div class="form-group" style="margin: 0" ng-class="{'has-error': acctController.needs.email}">						 
 							<label class="control-label" for="user_email">Email</label>
 							<input class="form-control" id="user_email" type="text" ng-model="user.email">
+						</div>
+
+						<div class="form-group" style="margin: 0" ng-class="{'has-error': acctController.needs.phone}">
+							<label class="control-label" for="user_phone">Phone</label>
+							<input class="form-control" id="user_phone" type="text" ng-model="user.phone">
 						</div>
 
 						<div class="row">
@@ -243,7 +308,8 @@
 						</div>
 					</div>
 					
-					<div ng-if="screen == 2"> 
+					<!-- QUESTIONNAIRE -->
+					<div ng-if="screen == 2" class="panel panelDefault accountFrame"> 
 						<div class="form-group" ng-class="{'has-error': acctController.needs.bio}">
 							<label for="user_bio" class="control-label">Who are you?</label>
 							<textarea class="form-control" id="user_bio" ng-model="user.bio" maxlength="300"></textarea>
@@ -252,27 +318,51 @@
 							</div>
 						</div>
 						<div style="margin: 5px; text-align: center;">
-							<a class="btn btn-raised btn-success" ng-click="acctController.saveAndProgress()" ng-if="user.isNew">Start Meeting People</a>
+							<a class="btn btn-raised btn-success" ng-click="acctController.saveAndProgress()" ng-if="user.isNew">Next</a>
 							<a class="btn btn-raised btn-success" ng-click="acctController.saveAndProgress()" ng-if="!user.isNew">Save</a>
 						</div>
 					</div>
 
-					<div ng-if="screen == 3">
-						WHEN ARE YOU AVAILABLE?
-						<div class="btn-group-vertical">
-							<a class="btn btn-raised">Button</a>
-							<a class="btn btn-raised">Button</a>
-							<a class="btn btn-raised">Button</a>
-							<a class="btn btn-raised">Button</a>
+					<!-- AVAILABILITY -->
+					<div ng-if="screen == 3"  class="panel panelDefault accountFrame scheduleWidget">
+						<div class="header">When are you available?</div>
+						
+						<uib-accordion close-others="true">
+							<uib-accordion-group ng-repeat="day in acctController.days">
+								<uib-accordion-heading>
+									{{day}}
+									<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': org.signup.signedup, 'glyphicon-chevron-right': !org.signup.signedup}"></i>
+								</uib-accordion-heading>
+
+								<div class="form-group togglebutton" style="margin-top: 0;" ng-repeat="time in acctController.times">
+									
+									<label>
+										<input checked="" type="checkbox" ng-model="user.availability[day][time]" ng-click="acctController.updateAvailability(day, time)"> 
+									</label>
+									<span ng-class="{toggledOn : user.availability[day][time]}" ng-click="acctController.updateAvailability(day, time, true)">
+										{{time}}
+									</span>
+								</div>
+							</uib-accordion-group>
+							
+						</uib-accordion>
+
+
+						<div style="margin: 5px; text-align: center;">
+							<a class="btn btn-raised btn-success" ng-click="acctController.saveAndProgress()" ng-if="user.isNew">Start Connecting</a>
+							<a class="btn btn-raised btn-success" ng-click="acctController.saveAndProgress()" ng-if="!user.isNew">Save</a>
 						</div>
 					</div>
 
+					<!-- MENU -->
 					<div ng-if="screen == 'menu'"> 
 						<h2 style="text-align: center">My Account</h2>
 						<div style="margin: 5px; text-align: center;">
 							<a class="btn btn-raised btn-success" ng-click="acctController.loadScreen(1)">Edit Profile</a>
 							<br /><br />
 							<a class="btn btn-raised btn-success" ng-click="acctController.loadScreen(2)">Edit Bio</a>
+							<br /><br />
+							<a class="btn btn-raised btn-success" ng-click="acctController.loadScreen(3)">Edit Availability</a>
 							<br /><br />
 							<a class="btn btn-raised btn-success" ng-click="apiClient.logoutUser()">Log Out</a>
 						</div>
@@ -301,7 +391,7 @@
 					<div>Home</div>
 				</div>
 
-				<div class="link account" ng-click="loadView('account', 'menu')"
+				<div class="link account" ng-click="rootController.loadView('account', 'menu')"
 					ng-class="{active : currentComponent == 'account'}">
 					<i class="glyphicon glyphicon-user"></i>
 					<div>Account</div>

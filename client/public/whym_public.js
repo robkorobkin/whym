@@ -5,7 +5,7 @@ var appInterfaceName = "public";
 
 
 
-var app = angular.module('whymApp', ['LocalStorageModule']);
+var app = angular.module('whymApp', ['LocalStorageModule', 'ui.bootstrap', 'ngAnimate']);
 
 app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window',  'localStorageService',
 	function($scope, $http, $sce, $rootScope, $window, localStorageService){
@@ -64,10 +64,19 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 		$scope.orgNavigator = {
 
 			init : function(){
-				this.search_parameters = {};
+				this.search_parameters = {
+					field : 'test',
+					mode : 'mine'
+				};
 			},
 
-			searchForOrganizations : function(){
+			loadList : function(organizations){
+				$scope.orgNavigator.orgs = organizations;
+				$scope.rootController.loadView('list');
+			},
+
+			searchForOrganizations : function(mode){
+				this.search_parameters.mode = (mode) ? mode :'searchNew';
 				var request = {
 					'verb' : 'searchForOrganizations',
 					'search_parameters' : this.search_parameters
@@ -76,27 +85,12 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 				$scope.rootController.loadView('loading');
 
 				$scope.apiClient.postData(request, function(response){
-					$scope.orgNavigator.orgs = response.organizations;
-					$scope.rootController.loadView('list');
+					$scope.orgNavigator.loadList(response.organizations);
 				});
 			},
 
 			getMyOrganizations : function(){
-				var request = {
-					'verb' : 'searchForOrganizations',
-					'search_parameters' : {
-						mode : 'mine'
-					}
-				}
-
-				this.mode = 'mine';
-
-				$scope.rootController.loadView('loading');
-
-				$scope.apiClient.postData(request, function(response){
-					$scope.orgNavigator.orgs = response.organizations;
-					$scope.rootController.loadView('list');
-				});
+				this.searchForOrganizations('mine');
 			}
 
 
@@ -104,7 +98,34 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 		
 		$scope.orgController = {
 			openOrg : function(org){
-				
+				var request = {
+					organizationId : org.organizationId,
+					client_time : Utilities.getNowMysqlTime(),
+					verb : 'getOrganization'
+				}
+				$scope.apiClient.postData(request, function(response){
+					var organization = response.organization;
+
+					for(var index in organization.updates){
+						var update = organization.updates[index];
+						update.trustedHtml = $sce.trustAsHtml(update.body.replace(/(?:\r\n|\r|\n)/g, '<br />'));
+
+						if('event' in update){
+							var event = update.event;
+							event.url = 'https://www.facebook.com/events/' + event.event_FbId;
+						}
+						else update.event = false;
+
+					}
+
+
+					console.log(organization)
+					
+					$scope.orgController.loadOrg(organization);
+				})
+			},
+
+			loadOrg : function(org){
 				// figure out if the user has "signed up" for the organization
 				org.signup = {
 					signedup : (org.status == "signed up" || org.status == "admin")
@@ -140,6 +161,10 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 				$scope.apiClient.postData(request, function(response){
 					logger(response);
 				});
+			},
+
+			changeMode : function(mode){
+				$scope.rootController.loadView('org', mode);
 			}
 
 
@@ -151,4 +176,3 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 	}
 	
 ]);
-
