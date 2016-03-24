@@ -5,7 +5,7 @@
 ?><!DOCTYPE html>
 <html lang="en">
 	<head>
-
+		<meta name="google-site-verification" content="jLu4WMzaLXi6tJ96a7vmyJFMRSA_2-LR8QwjQ-bG83U" />
 		<!-- SHARED FRAMEWORK -->
 		<?php include('client/shared/head.php'); ?>
 
