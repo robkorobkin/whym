@@ -58,7 +58,7 @@
 
 	}
 
-	if($app == 'admin') $config['client']['base_url'] .= '/admin.php';
+	if($app == 'admin') $config['client']['base_url'] .= '/admin.php/';
 
 	
 	// authentication url
