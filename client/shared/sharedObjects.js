@@ -233,7 +233,7 @@ var sharedObjects = {
 				$rootScope.appScope.rootController.loadView('loading');	
 			}
 
-			var logout_url = 'https://www.facebook.com/logout.php?next=' + encodeURIComponent(whym_settings.base_url) + '&access_token=' + $rootScope.appScope.user.fbAccessToken;
+			var logout_url = 'https://www.facebook.com/logout.php?next=' + encodeURIComponent(whym_settings.redirect_url) + '&access_token=' + $rootScope.appScope.user.fbAccessToken;
 
 			$rootScope.appScope.user = {};
 			$rootScope.appScope.loaded = false;
