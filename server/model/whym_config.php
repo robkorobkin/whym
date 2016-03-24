@@ -67,7 +67,7 @@
 
 	$config['client']['facebook']['auth_url'] = 
 		'https://www.facebook.com/dialog/oauth?client_id=' . $config['client']['facebook']['appId']
-		. '&redirect_uri=' . urlencode($config['client']['base_url'])
+		. '&redirect_uri=' . urlencode($config['client']['redirect_url'])
 		. '&scope=' . $perms;
 
 
