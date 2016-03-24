@@ -30,9 +30,6 @@
 				'base_url' => 'http://www.localhost.com/biz/whym/app',
 				"facebook" => array(
 					"appId" => '583531605136818',
-				),
-				"api" => array(
-					"admin_path" => 'http://www.localhost.com/whym/app/admin/server/whym_admin.php'
 				)
 			);
 		break;
@@ -46,7 +43,17 @@
 				"database" => "whym"
 			);
 
-			$config["facebook"]["appId"] = '';
+			$config['facebook_secret'] = 'a58d2f9b42477bb9a207d601cd2078a5';
+
+			$config["client"] = array(
+				'base_url' => 'http://whymtech.com/',
+				"facebook" => array(
+					"appId" => '1590175971308287',
+				)
+			);
+
+
+			
 		break;
 
 	}
