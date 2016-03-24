@@ -10,7 +10,7 @@
 
 
 	$config = array();
-	if(strpos(getCwd(), "machigon") !== false) $environment = "dev";
+	if(strpos(getCwd(), "var") !== false) $environment = "prod";
 	else $environment = "local";
 	
 	switch($environment) {
@@ -38,13 +38,14 @@
 		break;
 	
 		// development environment configuration
-		case "dev" : 
+		case "prod" : 
 			$config["database"] = array(
 				"servername" => "localhost",
-				"username" => "machigon_introdu", 
-				"password" => "whym!",
-				"database" => "machigon_whym"
+				"username" => "root", 
+				"password" => "mFFf6rbfOh",
+				"database" => "whym"
 			);
+
 			$config["facebook"]["appId"] = '';
 		break;
 
