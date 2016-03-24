@@ -158,7 +158,8 @@ var sharedObjects = {
 				request.organizationId = $rootScope.appScope.org.organizationId;
 			}
 			request.app = appInterfaceName;
-			$.post('server/whym_api.php', request, function(response){
+			var api_path = (appInterfaceName == 'admin') ? '../server/whym_api.php' : 'server/whym_api.php';
+			$.post(api_path, request, function(response){
 				if('error' in response){
 					logger("API ERROR");
 					logger(response);
