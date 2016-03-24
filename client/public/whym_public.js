@@ -16,7 +16,8 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 
 
 			// set window-level pointer to app scope
-			window.$scope = $scope; 
+			$rootScope.appScope = $scope; 
+			window.$rootScope = $rootScope; 
 			window.localStorageService = localStorageService;
 
 
