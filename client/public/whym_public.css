@@ -8,8 +8,20 @@ html 			{ height: 100%; }
 
 body			{ 	margin: 0; font-family: 'Open Sans', sans-serif;  background: #e9eaed; 
 					display: flex; flex-direction: column; height: 100%; overflow: hidden; width: 100%; ;}
-a				{ cursor: pointer; }
+a				{ cursor: pointer; border: none !important;}
 img				{ display: block; }
+
+
+
+a::-moz-focus-inner {
+  border: 0;
+}
+
+a:focus, button:focus { 
+    outline: none; 
+}
+
+
 
 .scrollable{min-height:0;-webkit-box-flex:1;box-flex:1;-webkit-flex:1;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 @media only screen and (min-device-width: 768px) {
@@ -73,14 +85,15 @@ img				{ display: block; }
 #user_bio 			{ display: block; width: 100%; height: 205px; font-size: 12px;}
 
 
-/* STYLE ACCORDION */
-.scheduleWidget 				{ margin-top: 15px }
+/* AVAILABILITY ACCORDION */
+.scheduleWidget .header			{ margin-bottom: 15px }
 .panel.panel-default > .panel-heading, .panel > .panel-heading { background: white }
 .scheduleWidget .panel			{ padding: 0 }
 .scheduleWidget .panel-body		{ border-top: dashed 1px #ccc !important; }
 .panel-heading 					{ padding: 0; }
 .panel-heading a 				{ padding: 10px 15px; display: block; }
-
+.scheduleWidget .toggleLink 	{ font-size: 12px; text-align: center; color: #aaa; padding-top: 15px; cursor: pointer;}
+.scheduleWidget .toggledOn 		{ color: black;}
 
 
 

@@ -339,7 +339,7 @@
 									<label>
 										<input checked="" type="checkbox" ng-model="user.availability[day][time]" ng-click="acctController.updateAvailability(day, time)"> 
 									</label>
-									<span ng-class="{toggledOn : user.availability[day][time]}" ng-click="acctController.updateAvailability(day, time, true)">
+									<span ng-class="{toggledOn : user.availability[day][time]}" ng-click="acctController.updateAvailability(day, time, true)" class="toggleLink">
 										{{time}}
 									</span>
 								</div>
@@ -350,7 +350,7 @@
 
 						<div style="margin: 5px; text-align: center;">
 							<a class="btn btn-raised btn-success" ng-click="acctController.saveAndProgress()" ng-if="user.isNew">Start Connecting</a>
-							<a class="btn btn-raised btn-success" ng-click="acctController.saveAndProgress()" ng-if="!user.isNew">Save</a>
+							<a class="btn btn-raised btn-success" ng-click="acctController.saveAndProgress()" ng-if="!user.isNew">Close</a>
 						</div>
 					</div>
 

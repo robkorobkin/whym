@@ -26,22 +26,22 @@ var sharedObjects = {
 		init : function(){
 
 			// load settings
-			$scope.appName = 'whym';
+			$rootScope.appScope.appName = 'whym';
 			
 
 			// initialize view state
-			$scope.loaded = false;
-			$scope.view = 'loading';
-			$scope.header = {
+			$rootScope.appScope.loaded = false;
+			$rootScope.appScope.view = 'loading';
+			$rootScope.appScope.header = {
 				show : false
 			}
-			$scope.footer = {
+			$rootScope.appScope.footer = {
 				show : false
 			}
 			
 
 			//  read state from cookie
-			$scope.cookieMonster.load();
+			$rootScope.appScope.cookieMonster.load();
 
 
 
@@ -50,15 +50,15 @@ var sharedObjects = {
 			
 
 			// and launch app
-			if($scope.sessionInCookie) {
+			if($rootScope.appScope.sessionInCookie) {
 				this.loadInitialView();
-				$scope.apiClient.logIntoWhym(); // runs in the background
+				$rootScope.appScope.apiClient.logIntoWhym(); // runs in the background
 			}
 			else if(fb_code){
-				$scope.user = {
+				$rootScope.appScope.user = {
 			 		fb_code : fb_code			 	
 			 	}				
-			 	$scope.apiClient.logIntoWhym();
+			 	$rootScope.appScope.apiClient.logIntoWhym();
 			}
 			else {
 				this.loadView('login');
@@ -70,33 +70,33 @@ var sharedObjects = {
 
 			//logger("trying to load: " + view + ' - ' + screen)
 			
-			if(view == "loading" || view == "login") $scope.footer.show = false;
+			if(view == "loading" || view == "login") $rootScope.appScope.footer.show = false;
 			
 			// if the user is in the initial account set-up phase, don't show the bottom navigation
-			else if('isNew' in $scope.user && parseInt($scope.user.isNew) == 1) $scope.footer.show = false;
+			else if('isNew' in $rootScope.appScope.user && parseInt($rootScope.appScope.user.isNew) == 1) $rootScope.appScope.footer.show = false;
 
-			else $scope.footer.show = true;
+			else $rootScope.appScope.footer.show = true;
 
-			$scope.showSidebar = (view != "login");
+			$rootScope.appScope.showSidebar = (view != "login");
 
 
-			$scope.view = view;
-			if(screen) $scope.screen = screen;
+			$rootScope.appScope.view = view;
+			if(screen) $rootScope.appScope.screen = screen;
 
 			// update footer view
-			$scope.currentComponent = view;
+			$rootScope.appScope.currentComponent = view;
 		},
 
 		// LOAD APP
 		loadInitialView : function(){
 
-			$scope.loaded = true;
+			$rootScope.appScope.loaded = true;
 
 			// load view - if new, load account interface, otherwise load feed
 			if(appInterfaceName == "admin"){
-				console.log($scope.user);
-				if(parseInt($scope.user.lastOrganizationId) && 'activeOrganization' in $scope.user){
-					$scope.org = $scope.user.activeOrganization;
+				console.log($rootScope.appScope.user);
+				if(parseInt($rootScope.appScope.user.lastOrganizationId) && 'activeOrganization' in $rootScope.appScope.user){
+					$rootScope.appScope.org = $rootScope.appScope.user.activeOrganization;
 					this.loadView('orgProfile');
 				}
 				else {
@@ -104,14 +104,14 @@ var sharedObjects = {
 				}							
 			}
 			else {
-				if(parseInt($scope.user.isNew)){
+				if(parseInt($rootScope.appScope.user.isNew)){
 					this.loadView('account', 1);
 				}
 				else {
-					console.log($scope.user);
+					console.log($rootScope.appScope.user);
 
 					// deep load
-					$scope.orgNavigator.loadList($scope.user.organizations);
+					$rootScope.appScope.orgNavigator.loadList($rootScope.appScope.user.organizations);
 				}
 			}
 
@@ -126,17 +126,17 @@ var sharedObjects = {
 
 			// load user
 			var user = localStorageService.get('user_' + appInterfaceName);		
-			$scope.sessionInCookie = (user && 'isNew' in user);
-			$scope.user = (user) ? user : {};
+			$rootScope.appScope.sessionInCookie = (user && 'isNew' in user);
+			$rootScope.appScope.user = (user) ? user : {};
 			
 			
 		},
 
 		save : function(){
 
-			if('isNew' in $scope.user) $scope.user.isNew = parseInt($scope.user.isNew);
+			if('isNew' in $rootScope.appScope.user) $rootScope.appScope.user.isNew = parseInt($rootScope.appScope.user.isNew);
 
-			localStorageService.set('user_' + appInterfaceName, $scope.user);
+			localStorageService.set('user_' + appInterfaceName, $rootScope.appScope.user);
 
 		},
 
@@ -150,12 +150,12 @@ var sharedObjects = {
 	apiClient : {
 		
 		postData : function(request, f){
-			if("user" in $scope){
-				request.uid = $scope.user.uid;
-				request.access_token = $scope.user.fbAccessToken;
+			if("user" in $rootScope.appScope){
+				request.uid = $rootScope.appScope.user.uid;
+				request.access_token = $rootScope.appScope.user.fbAccessToken;
 			} 
-			if("org" in $scope && !("organizationId" in request)){
-				request.organizationId = $scope.org.organizationId;
+			if("org" in $rootScope.appScope && !("organizationId" in request)){
+				request.organizationId = $rootScope.appScope.org.organizationId;
 			}
 			request.app = appInterfaceName;
 			$.post('server/whym_api.php', request, function(response){
@@ -164,7 +164,7 @@ var sharedObjects = {
 					logger(response);
 				}
 				else if(f) f(response);
-				$scope.$digest();
+				$rootScope.appScope.$digest();
 			}, 'json');
 		},
 
@@ -174,7 +174,7 @@ var sharedObjects = {
 
 		logIntoWhym : function(){
 
-			if(!("user" in $scope)){
+			if(!("user" in $rootScope.appScope)){
 				logger("tried to login to app without a user in the cookie");
 				return;
 			}
@@ -185,11 +185,11 @@ var sharedObjects = {
 			}
 
 
-			if(("fbAccessToken" in $scope.user)) {
-				request.access_token = $scope.user.fbAccessToken;
+			if(("fbAccessToken" in $rootScope.appScope.user)) {
+				request.access_token = $rootScope.appScope.user.fbAccessToken;
 			}
-			else if("fb_code" in $scope.user){
-				request.fb_code = $scope.user.fb_code;
+			else if("fb_code" in $rootScope.appScope.user){
+				request.fb_code = $rootScope.appScope.user.fb_code;
 			}
 			else {
 				logger("tried to login before user was logged into facebook");
@@ -197,49 +197,50 @@ var sharedObjects = {
 			}
 
 
-			$scope.apiClient.postData(request, function(response){
+			$rootScope.appScope.apiClient.postData(request, function(response){
 
 				// if their token doesn't validate on our server, log them out
 				if("error" in response){ 
-					$scope.cookieMonster.clear();
-					$scope.rootController.loadView('login');
+					$rootScope.appScope.cookieMonster.clear();
+					$rootScope.appScope.rootController.loadView('login');
 				}
 
 				// else update session
 				else {
-					$scope.user = response.user;
+					$rootScope.appScope.user = response.user;
+					$rootScope.appScope.acctController.loadUser();
 					
-					//if(parseInt($scope.user.isNew)) $scope.loaded = false;
-					$scope.cookieMonster.save();
+					//if(parseInt($rootScope.appScope.user.isNew)) $rootScope.appScope.loaded = false;
+					$rootScope.appScope.cookieMonster.save();
 					
 					// if you're just logging in...
-					if(!$scope.loaded){
-						$scope.rootController.loadInitialView();
+					if(!$rootScope.appScope.loaded){
+						$rootScope.appScope.rootController.loadInitialView();
 					}
 
-					$scope.cookieMonster.save();
+					$rootScope.appScope.cookieMonster.save();
 				}
 
-				$scope.$digest();
+				$rootScope.appScope.$digest();
 				
 			});
 		},
 
 		logoutUser : function(){
 
-			if($scope.view != 'login'){
-				$scope.rootController.loadView('loading');	
+			if($rootScope.appScope.view != 'login'){
+				$rootScope.appScope.rootController.loadView('loading');	
 			}
 
-			var logout_url = 'https://www.facebook.com/logout.php?next=' + encodeURIComponent(whym_settings.base_url) + '&access_token=' + $scope.user.fbAccessToken;
+			var logout_url = 'https://www.facebook.com/logout.php?next=' + encodeURIComponent(whym_settings.base_url) + '&access_token=' + $rootScope.appScope.user.fbAccessToken;
 
-			$scope.user = {};
-			$scope.loaded = false;
-			$scope.sessionInCookie = false;
+			$rootScope.appScope.user = {};
+			$rootScope.appScope.loaded = false;
+			$rootScope.appScope.sessionInCookie = false;
 
-			$scope.rootController.loadLoginScreen();
+			$rootScope.appScope.rootController.loadLoginScreen();
 
-			$scope.cookieMonster.clear();	
+			$rootScope.appScope.cookieMonster.clear();	
 			
 			
 			window.location = logout_url;
@@ -265,20 +266,42 @@ var sharedObjects = {
 
 		sending: false,
 
+ 		loadUser : function(user){
+ 			if(!user) user = $rootScope.appScope.user;
+ 			
+			// build availability object
+			var availability = {};
+			$.each(this.days, function(i, day){
+				availability[day] = {};
+				$.each($rootScope.appScope.acctController.times, function(j, time){
+					availability[day][time] = false;
+				});
+			});
+
+			// load availability from database
+			$.each(user.availability_data, function(index, a){
+				availability[a.day][a.time] = true;
+			});
+
+			// save into user object
+			user.availability = availability;
+			return user;
+		},
+
 		loadLoginScreen : function(){
-			$scope.header.show = false;
-			$scope.footer.show = false;
-			$scope.loadView('login');				
+			$rootScope.appScope.header.show = false;
+			$rootScope.appScope.footer.show = false;
+			$rootScope.appScope.loadView('login');				
 		},
 		
 		loadScreen : function(screenNumber){
-			$scope.rootController.loadView('account', screenNumber)
+			$rootScope.appScope.rootController.loadView('account', screenNumber)
 		},
 
 		saveAndProgress : function(){
 			if(this.sending) return;
 
-			$scope.screen = parseInt($scope.screen);
+			$rootScope.appScope.screen = parseInt($rootScope.appScope.screen);
 
 			// validate
 			var validate = {
@@ -286,49 +309,53 @@ var sharedObjects = {
 				2 : ['bio'],
 				3 : []
 			}
-			var fields = validate[$scope.screen];
-			if(!Utilities.validate($scope.user, fields, $scope.acctController.needs)) return;
+			var fields = validate[$rootScope.appScope.screen];
+			if(!Utilities.validate($rootScope.appScope.user, fields, $rootScope.appScope.acctController.needs)) return;
 
 			
 			// save updated user
 			this.sending = true;
-			if($scope.screen == 3){
-				$scope.user.availability = {
+			if($rootScope.appScope.screen == 3){
+				$rootScope.appScope.user.availability = {
 					days : "none"
 				};
 			}
 			var request = {
-				user: $scope.user,
+				user: $rootScope.appScope.user,
 				verb: 'updateUser'
 			}
 			
-			$scope.apiClient.postData(request, function(user){
-				var wasNew = $scope.user.isNew;
-				$scope.user = user;
-				$scope.cookieMonster.save();
+			$rootScope.appScope.apiClient.postData(request, function(user){
+				var wasNew = $rootScope.appScope.user.isNew;
+				$rootScope.appScope.user = user;
+				$rootScope.appScope.acctController.loadUser();
+				$rootScope.appScope.cookieMonster.save();
 
 				// iterate to next screen
-				$scope.acctController.sending = false;
+				$rootScope.appScope.acctController.sending = false;
 				if(wasNew){
-					$scope.screen++;
-					if($scope.screen == 4) {
-						$scope.orgNavigator.searchForOrganizations()
+					$rootScope.appScope.screen++;
+					if($rootScope.appScope.screen == 4) {
+						$rootScope.appScope.orgNavigator.searchForOrganizations()
 					}						
 				}
 				else {
-					$scope.rootController.loadView('account', 'menu');
+					$rootScope.appScope.rootController.loadView('account', 'menu');
 				}
 			});
 		},
 
-		updateAvailability : function(day, time, fromSwitch){
+		updateAvailability : function(day, time, flip){
+
+			if(flip) $rootScope.appScope.user.availability[day][time] = !($rootScope.appScope.user.availability[day][time]);
+
 			var request = {
 				day : day,
 				time : time,
 				verb : 'updateAvailability'
 			}
-			$scope.apiClient.postData(request, function(response){
-				console.log(response);
+			$rootScope.appScope.apiClient.postData(request, function(response){
+				// don't do anything - model updates on user-action
 			})
 		}
 	

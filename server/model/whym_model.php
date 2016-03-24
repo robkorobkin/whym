@@ -163,6 +163,8 @@
 			unset($user['fbAccessToken']);
 			unset($user['organizations']);
 			unset($user['middle_name']);	// control which fields we get from facebook?
+			unset($user['availability_data']);
+			
 
 
 
@@ -181,6 +183,21 @@
 			
 
 			return $user;
+		}
+
+		function updateAvailability(){
+			$this -> validateInput(array("day", "time"));
+			extract($this -> request);
+			$where = array(
+				"userId" => $this -> uid,
+				"day" => $day,
+				"time" => $time
+			);
+			$availability = $this -> db -> get_FromObj($where, "availability");
+			if(count($availability) == 0) $this -> db -> insert($where, "availability");
+			else $this -> db -> delete($availability, "availability");
+			return array("status" => "success");
+
 		}
 
 
@@ -263,7 +280,6 @@
 			}
 			
 			return $organizations; 	
-
 		}
 
 		function getOrganization(){
@@ -302,8 +318,8 @@
 			return array(
 				"organization" => $organization
 			);
-
 		}
+
 
 
 
@@ -389,11 +405,15 @@
 		}
 
 		function AdminGetPeople(){
-			$sql = 	'SELECT u.fbId, u.first_name, u.last_name, s.status from users u, signups s ' . 
+			$sql = 	'SELECT u.*, s.status from users u, signups s ' . 
 					'where u.uid=s.uid AND (s.status="signed up" or s.status="admin")' .
 					' AND s.organizationId=' . (int) $this -> request['organizationId'];
 
 			$people = $this -> db -> get_results($sql);
+			foreach($people as $k => $person){
+				$people[$k] = $this -> _loadUser($person);
+			}
+
 
 			return array(
 				"people" => $people
@@ -884,6 +904,11 @@
 					"string" => ""
 				);
 			}
+
+
+			// get availability
+			$sql = "select day, time from availability where userId=" . (int) $user['uid'];
+			$user['availability_data'] = $this -> db -> get_results($sql);
 
 			return $user;
 		}

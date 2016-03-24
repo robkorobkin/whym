@@ -1,14 +1,15 @@
 var appInterfaceName = "admin";
 
-var app = angular.module('whymAdminApp', ['LocalStorageModule', 'ui.bootstrap']);
+var app = angular.module('whymAdminApp', ['LocalStorageModule', 'ui.bootstrap', 'ngAnimate']);
 
-app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window',  'localStorageService', '$modal',
-	function($scope, $http, $sce, $rootScope, $window, localStorageService, $modal){
+app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', 'localStorageService', '$uibModal',
+	function($scope, $http, $sce, $rootScope, localStorageService, $uibModal){
 		
 		$scope.init = function(){
 
 			// set window-level pointer to app scope
-			window.$scope = $scope; 
+			$rootScope.appScope = $scope; 
+			window.$rootScope = $rootScope;
 			window.localStorageService = localStorageService;
 
 
@@ -29,10 +30,10 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 
 
 			// INIT DROPDOWN.JS
-			$(".select").dropdown({ 
-				"autoinit" : ".select",
-				"optionClass": "withripple"
-			});
+			// $(".select").dropdown({ 
+			// 	"autoinit" : ".select",
+			// 	"optionClass": "withripple"
+			// });
 			
 
 			// WHAT HAPPENS WHEN 
@@ -98,18 +99,38 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 					verb : 'AdminGetPeople'
 				}
 				$scope.apiClient.postData(request, function(response){
-					$scope.org.people = response.people;
-					for(var i = 0; i< 20; i++) $scope.org.people.push(angular.copy(response.people[0]));
+					
+					$scope.org.people = [];
+					$.each(response.people, function(index, person){
+						$scope.org.people.push($scope.acctController.loadUser(person));
+					});
+
 					$scope.rootController.loadView('orgPeople');
 				});
 			},
 
 			openPerson : function(person){
-				console.log('trying to opern a person in a modal dialogue')
-				$modal.open({					
-					template: $('#personTemplate').html(),
+				$scope.person = person;
+
+				var modalInstance = $uibModal.open({
+					templateUrl:    'personTemplate.html',
 					controller: 'whymAdminCtrl_Person',
-				});			
+                    resolve: {
+                        person: function () {
+                          return $scope.person;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(
+                    function (person) {
+                    	// On "ok" - save person
+                        // $scope.selected = selectedItem;
+                    }, 
+                    function () {
+                    	// modal dismissed
+                    }
+                );		
 
 			},
 
@@ -448,11 +469,22 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', '$wind
 	
 ]);
 
-app.controller('whymAdminCtrl_Person', ['$scope',
-	function($scope){
+app.controller('whymAdminCtrl_Person', ['$scope', '$uibModalInstance', 'person',
+	function($scope, $uibModalInstance, person){
+		console.log(person);
+		$scope.person = person;
+
+		$scope.banana = "BAANANANA";
 		
-		alert('hello from inside the modal controller')
-		
+		// on "ok" - save person 
+		$scope.ok = function () {
+	        $uibModalInstance.close($scope.selected.item);
+	    };
+
+	    // on "cancel" - dismiss modal
+	    $scope.cancel = function () {
+	        $uibModalInstance.dismiss('cancel');
+	    };
 	}
 	
 ]);

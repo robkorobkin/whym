@@ -11,8 +11,8 @@
 
 		<!-- ADMIN-SPECIFIC -->
 		<!-- Dropdown.js -->
-		<link href="//cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.css" rel="stylesheet">
-		<script src="https://cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.js"></script>
+		<!-- <link href="//cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.css" rel="stylesheet">
+		<script src="https://cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.js"></script> -->
 		
 		<!-- APP -->
 		<script src="server/whym_api.php?lib=js&app=admin"></script>
@@ -20,11 +20,11 @@
 
 	</head>
 	
-	<body  ng-app="whymAdminApp" ng-controller="whymAdminCtrl">
+	<body  ng-app="whymAdminApp" >
 	
 		
 		<!-- INTERNAL APP FRAME -->
-		<div class="appFrame scrollable" >
+		<div class="appFrame scrollable" ng-controller="whymAdminCtrl">
 		
 			
 			<!-- SIDEBAR -->
@@ -179,7 +179,7 @@
 				<!-- ORGANIZATION - PEOPLE-->
 				<div ng-if="view == 'orgPeople'" class=" primaryFrame orgPeople">
 					<div ng-repeat="(index, person) in org.people" class="person col-sm-2" ng-click="organizationController.openPerson(person)">
-						<img ng-src="//graph.facebook.com/{{person.fbId}}/picture?height=268&width=268" class="personImg" />
+						<img ng-src="//graph.facebook.com/{{person.fbid}}/picture?height=268&width=268" class="personImg" />
 						<div class="name">{{person.first_name}} {{person.last_name}}</div>
 					</div>
 				</div>
@@ -388,90 +388,115 @@
 				<div ng-if="view == 'orgProfile'" class=" primaryFrame profileEditor">
 					<h2>Edit Organization Profile</h2>
 
-					<!-- HEADER -->
-					<div class="profileHeader">
+
+					<uib-accordion close-others="true">
+
+						<!-- BASIC INFORMATION -->
+						<uib-accordion-group>
+							<uib-accordion-heading>
+								Basic Information
+								<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': true, 'glyphicon-chevron-right': false}"></i>
+							</uib-accordion-heading>
+							<div class="form-group" style="margin: 0" ng-class="{'has-error': organizationController.needs.organizationName}">
+								<label class="control-label" for="org_organizationName" >Organization Name</label>
+								<input class="form-control" id="org_organizationName" type="text" ng-model="org.organizationName" ng-required>
+							</div>
+							<div class="form-group" style="margin: 0" ng-class="{'has-error': organizationController.needs.website}">
+								<label class="control-label" for="org_website" >Website</label>
+								<input class="form-control" id="org_website" type="text" ng-model="org.website" ng-required>
+							</div>
+						</uib-accordion-group>
 						
-						<div class="form-group" style="margin: 0" ng-class="{'has-error': organizationController.needs.organizationName}">
-							<label class="control-label" for="org_organizationName" >Organization Name</label>
-							<input class="form-control" id="org_organizationName" type="text" ng-model="org.organizationName" ng-required>
-						</div>
-						<div class="form-group" style="margin: 0" ng-class="{'has-error': organizationController.needs.website}">
-							<label class="control-label" for="org_website" >Website</label>
-							<input class="form-control" id="org_website" type="text" ng-model="org.website" ng-required>
-						</div>
-					
-					</div>
-
-					<!-- DESCRIPTION -->
-					<div class="form-group orgDescriptionFrame" ng-class="{'has-error': organizationController.needs.organizationDescription}">
-						<label for="org_organizationDescription" class="control-label">What is this organization all about?</label>
-						<textarea class="form-control" id="org_organizationDescription" ng-model="org.organizationDescription" maxlength="500"></textarea>
-						<div style="height: 25px;">
-							<span class="help-block">{{(500 - org.organizationDescription.length)}} chars remaining</span>
-						</div>
-					</div>
+						<!-- DESCRIPTION -->
+						<uib-accordion-group>
+							<uib-accordion-heading>
+								Description
+								<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': true, 'glyphicon-chevron-right': false}"></i>
+							</uib-accordion-heading>
+							<div class="form-group orgDescriptionFrame" ng-class="{'has-error': organizationController.needs.organizationDescription}">
+								<label for="org_organizationDescription" class="control-label">What is this organization all about?</label>
+								<textarea class="form-control" id="org_organizationDescription" ng-model="org.organizationDescription" maxlength="500"></textarea>
+								<div style="height: 25px;">
+									<span class="help-block">{{(500 - org.organizationDescription.length)}} chars remaining</span>
+								</div>
+							</div>
+						</uib-accordion-group>
 
 
-					<!-- ORGANIZATION ADDRESS -->
-					<div>
-						<div style="width: 45%; float: left">
-							<div class="sectionHeader">Address:</div>
-							<div class="form-group" style="margin: 0">
-								<label class="control-label" for="org_address1">Address 1</label>
-								<input class="form-control" id="org_address1" type="text" ng-model="org.address1">
-							</div>
+						<!-- ADDRESS -->
+						<uib-accordion-group>
+							<uib-accordion-heading>
+								Address
+								<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': true, 'glyphicon-chevron-right': false}"></i>
+							</uib-accordion-heading>
+							<div style="width: 45%; float: left">
+								<div class="form-group" style="margin: 0">
+									<label class="control-label" for="org_address1">Address 1</label>
+									<input class="form-control" id="org_address1" type="text" ng-model="org.address1">
+								</div>
 
-							<div class="form-group">
-								<label class="control-label" for="org_address2">Address 2</label>
-								<input class="form-control" id="org_address2" type="text" ng-model="org.address2">
-							</div>
+								<div class="form-group">
+									<label class="control-label" for="org_address2">Address 2</label>
+									<input class="form-control" id="org_address2" type="text" ng-model="org.address2">
+								</div>
 
-							<div class="form-group">
-								<label class="control-label" for="org_city">City</label>
-								<input class="form-control" id="org_city" type="text" ng-model="org.city">
+								<div class="form-group">
+									<label class="control-label" for="org_city">City</label>
+									<input class="form-control" id="org_city" type="text" ng-model="org.city">
+								</div>
 							</div>
+							<div style="width: 45%; float: right">
+								<div class="form-group">
+									<label class="control-label" for="org_state">State</label>
+									<select class="form-control" id="org_state" ng-model="org.state">
+										<option ng-repeat="(abbrev, state) in dictionary.us_state_abbrevs_names" 	
+												ng-value="state" ng-selected="state == org.state">{{state}}</option>
+									</select>
+								</div>
 
-							<div class="form-group">
-								<label class="control-label" for="org_state">State</label>
-								<select class="form-control" id="org_state" ng-model="org.state">
-									<option ng-repeat="(abbrev, state) in dictionary.us_state_abbrevs_names" 	
-											ng-value="state" ng-selected="state == org.state">{{state}}</option>
-								</select>
+								<div class="form-group">
+									<label class="control-label" for="org_zip">Zip</label>
+									<input class="form-control" id="org_zip" type="text" ng-model="org.zip">
+								</div>
 							</div>
+						</uib-accordion-group>
 
-							<div class="form-group">
-								<label class="control-label" for="org_zip">Zip</label>
-								<input class="form-control" id="org_zip" type="text" ng-model="org.zip">
+						<!-- CONTACT -->
+						<uib-accordion-group>
+							<uib-accordion-heading>
+								Contact
+								<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': true, 'glyphicon-chevron-right': false}"></i>
+							</uib-accordion-heading>
+								<div style="width: 45%; float: left">
+									<div class="form-group">
+									<label class="control-label" for="org_contact1_FirstName">First Name</label>
+									<input class="form-control" id="org_contact1_FirstName" type="text" ng-model="org.contact1_FirstName">
+								</div>
+								<div class="form-group">
+									<label class="control-label" for="org_contact1_LastName">Last Name</label>
+									<input class="form-control" id="org_contact1_LastName" type="text" ng-model="org.contact1_LastName">
+								</div>
+								<div class="form-group">
+									<label class="control-label" for="org_contact1_Position">Position</label>
+									<input class="form-control" id="org_contact1_Position" type="text" ng-model="org.contact1_Position">
+								</div>
 							</div>
-						</div>
+							<div style="width: 45%; float: right">
+								<div class="form-group">
+									<label class="control-label" for="org_contact1_Email">Email</label>
+									<input class="form-control" id="org_contact1_Email" type="text" ng-model="org.contact1_Email">
+								</div>
+								<div class="form-group">
+									<label class="control-label" for="org_contact1_Phone">Phone</label>
+									<input class="form-control" id="org_contact1_Phone" type="text" ng-model="org.contact1_Phone">
+								</div>
+							</div>
+						</uib-accordion-group>
 
-						<!-- ORGANIZATION CONTACT -->
-						<div style="width: 45%; float: right">
-							<div class="sectionHeader">Primary Contact:</div>
-							<div class="form-group">
-								<label class="control-label" for="org_contact1_FirstName">First Name</label>
-								<input class="form-control" id="org_contact1_FirstName" type="text" ng-model="org.contact1_FirstName">
-							</div>
-							<div class="form-group">
-								<label class="control-label" for="org_contact1_LastName">Last Name</label>
-								<input class="form-control" id="org_contact1_LastName" type="text" ng-model="org.contact1_LastName">
-							</div>
-							<div class="form-group">
-								<label class="control-label" for="org_contact1_Position">Position</label>
-								<input class="form-control" id="org_contact1_Position" type="text" ng-model="org.contact1_Position">
-							</div>
-							<div class="form-group">
-								<label class="control-label" for="org_contact1_Email">Email</label>
-								<input class="form-control" id="org_contact1_Email" type="text" ng-model="org.contact1_Email">
-							</div>
-							<div class="form-group">
-								<label class="control-label" for="org_contact1_Phone">Phone</label>
-								<input class="form-control" id="org_contact1_Phone" type="text" ng-model="org.contact1_Phone">
-							</div>
 
-						</div>
-					</div>
+					</uib-accordion>
 
+				
 					<div style="margin: 5px; text-align: center;">
 						<a class="btn btn-raised btn-success" ng-click="organizationController.updateOrganization()">Save</a>
 					</div>
@@ -518,7 +543,11 @@
 		<!-- MODAL TEMPLATES -->
 		<div style="display: none;">
 
-			<div id="personTemplate">I AM THE PERSON TEMPLATE</div>
+			<script type="text/ng-template" id="personTemplate.html">
+				I am not dynamic content! - {{banana}}
+				<br /><br />
+				<div class="name">{{person.first_name}} {{person.last_name}}</div>
+			</script>
 			
 		</div>		
 	</body>
