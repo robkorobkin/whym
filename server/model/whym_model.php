@@ -690,7 +690,7 @@
 		
 			$url = 	'https://graph.facebook.com/v2.5/oauth/access_token?' . 
 					'client_id=' . $client['facebook']['appId'] .
-					'&redirect_uri=' . urlencode($client['base_url']) . 
+					'&redirect_uri=' . urlencode($client['redirect_url'] ) . 
 					'&client_secret=' . $facebook_secret . 
 					'&code=' . $fb_code;
 

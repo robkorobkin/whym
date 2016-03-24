@@ -7,7 +7,7 @@
 	<head>
 
 		<!-- SHARED FRAMEWORK -->
-		<?php include('client/shared/head.php'); ?>
+		<?php include('../client/shared/head.php'); ?>
 
 		<!-- ADMIN-SPECIFIC -->
 		<!-- Dropdown.js -->
@@ -15,8 +15,8 @@
 		<script src="https://cdn.rawgit.com/FezVrasta/dropdown.js/master/jquery.dropdown.js"></script> -->
 		
 		<!-- APP -->
-		<script src="server/whym_api.php?lib=js&app=admin"></script>
-		<link href="server/whym_api.php?lib=css&app=admin" rel="stylesheet" type="text/css" />
+		<script src="../server/whym_api.php?lib=js&app=admin"></script>
+		<link href="../server/whym_api.php?lib=css&app=admin" rel="stylesheet" type="text/css" />
 
 	</head>
 	

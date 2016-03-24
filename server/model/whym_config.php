@@ -58,7 +58,7 @@
 
 	}
 
-	if($app == 'admin') $config['client']['base_url'] .= '/admin.php/';
+	$config['client']['redirect_url'] = $config['client']['base_url']  . ($app == 'admin') ? 'admin/' : '';
 
 	
 	// authentication url
