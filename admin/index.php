@@ -178,10 +178,57 @@
 
 				<!-- ORGANIZATION - PEOPLE-->
 				<div ng-if="view == 'orgPeople'" class=" primaryFrame orgPeople">
-					<div ng-repeat="(index, person) in org.people" class="person col-sm-2" ng-click="organizationController.openPerson(person)">
-						<img ng-src="//graph.facebook.com/{{person.fbid}}/picture?height=268&width=268" class="personImg" />
-						<div class="name">{{person.first_name}} {{person.last_name}}</div>
+					<div class="top clearfix">
+						<div class="left">
+							<input placeholder="Search..." ng-model="organizationController.person_search_term" ng-keyup="organizationController.filterPeople()"/>
+						</div>
+						<div class="right">
+							<ul class="pagination pagination-sm">
+								<li ng-class="{active : organizationController.peopleMode == 'list' }" >
+									<a ng-click="organizationController.peopleMode = 'list'">
+										<i class="glyphicon glyphicon-th-list"></i>
+									</a>
+								</li>
+								<li ng-class="{active : organizationController.peopleMode == 'icons' }" >
+									<a ng-click="organizationController.peopleMode = 'icons'">
+										<i class="glyphicon glyphicon-user"></i>
+									</a>
+								</li>
+							
+							</ul>
+						</div>
 					</div>
+					<div class="bottom clearfix">
+						<div ng-if="org.displayPeople.length == 0">
+							<i>Sorry.  There are no people who meet the specified criteria.</i>
+						</div>
+
+						<div ng-if="organizationController.peopleMode == 'icons' && org.displayPeople.length != 0">
+							<div ng-repeat="(index, person) in org.displayPeople" class="person col-sm-2" ng-click="organizationController.openPerson(person)">
+								<img ng-src="//graph.facebook.com/{{person.fbid}}/picture?height=268&width=268" class="personImg" />
+								<div class="name">{{person.first_name}} {{person.last_name}}</div>
+							</div>	
+						</div>
+
+						<div ng-if="organizationController.peopleMode == 'list' && org.displayPeople.length != 0">
+							<table>
+								<thead>
+									<tr>
+										<td>Name</td>
+										<td>Phone</td>
+										<td>Email</td>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="(index, person) in org.displayPeople">
+										<td><a ng-click="organizationController.openPerson(person)">{{person.first_name}} {{person.last_name}}</a></td>
+										<td>{{person.phone}}</td>
+										<td>{{person.email}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>		
 				</div>
 
 				<!-- ORGANIZATION - UPDATES-->
@@ -392,7 +439,7 @@
 					<uib-accordion close-others="true">
 
 						<!-- BASIC INFORMATION -->
-						<uib-accordion-group>
+						<uib-accordion-group  is-open="true">
 							<uib-accordion-heading>
 								Basic Information
 								<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': true, 'glyphicon-chevron-right': false}"></i>
@@ -538,15 +585,75 @@
 					</div>
 				</div>
 
+				<!-- PERSON  INFORMATION -->
+				<div ng-if="view == 'person'"  class="primaryFrame personFrame">
+					<a ng-click="rootController.loadView('orgPeople')" class="backBtn">&lt;&lt; BACK</a>
+
+					<!-- PERSON TOP - ICON, NAME, CONTACT -->
+					<div class="top clearfix">
+						<div class="left">
+							<img ng-src="//graph.facebook.com/{{person.fbid}}/picture?height=268&width=268" class="personFeatureImg" />
+						</div>
+						<div class="right">
+							<div class="name">{{person.first_name}} {{person.last_name}}</div>
+							<div class="location" ng-if="person.location">{{person.location}}</div>
+							<div class="email" ng-if="person.email">{{person.email}}</div>
+							<div class="phone" ng-if="person.phone">{{person.phone}}</div>
+						</div>
+					</div>
+
+					<!-- PERSON NAV -->
+					<ul class="nav nav-pills">
+						<li ng-class="{active : screen == 'questionnaire'}">
+							<a ng-click="rootController.loadView('person', 'questionnaire')">Questionnaire</a>
+						</li>
+						<li ng-class="{active : screen == 'availability'}">
+							<a ng-click="rootController.loadView('person', 'availability')">Availability</a>
+						</li>
+						<li ng-class="{active : screen == 'feedback'}">
+							<a  ng-click="rootController.loadView('person', 'feedback')">Feedback</a>
+						</li>
+					</ul>
+					
+					<div class="bottom">
+						
+						<!-- QUESTIONNAIRE RESPONSES -->
+						<div ng-if="screen == 'questionnaire'">
+							<div ng-repeat="question in questionnaire" ng-if="person[question.field] != '' ">
+								<div class="question">{{question.text}}</div>
+								<div class="answer">{{person[question.field]}}</div>
+							</div>
+						</div>
+
+						<!-- AVAILABILITY -->
+						<div ng-if="screen == 'availability'">
+							<div ng-repeat="day in person.availability_output">
+								<div class="question">{{day.dayName}}</div>
+								<div class="answer">{{day.times_str}}</div>
+							</div>
+						</div>
+						
+						<!-- FEEDBACK -->
+						<div ng-if="screen == 'feedback'">
+							FEEDBACK
+						</div>
+
+					</div>
+
+				</div>
+
 		</div>
 
 		<!-- MODAL TEMPLATES -->
 		<div style="display: none;">
 
 			<script type="text/ng-template" id="personTemplate.html">
-				I am not dynamic content! - {{banana}}
-				<br /><br />
-				<div class="name">{{person.first_name}} {{person.last_name}}</div>
+				<div class="personModal">
+					
+					<div class="modalMain">
+
+					</div>
+				</div>
 			</script>
 			
 		</div>		

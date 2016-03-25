@@ -1,4 +1,5 @@
 
+
 /*
 	AVAILABLE FONTS
 		- font-family: 'infiniregular',Helvetica,Arial,sans-serif;
@@ -116,7 +117,7 @@ a:focus, button:focus {
 .orgResult .inboxCount	{ background: red; height: 30px; line-height: 30px; width: 30px; text-align: center; color: white; border-radius: 15px; font-size: 13px; margin-right: 10px }
 
 
-/* PROFILE */
+/* ORGANIZATION */
 .organization 					{  }
 .organization .header			{ text-align: center; }
 .organization .orgTitle 		{ font-family: 'infiniregular',Helvetica,Arial,sans-serif; font-size: 20px; line-height: 32px }
@@ -129,6 +130,8 @@ a:focus, button:focus {
 .organization .trigger_icons 	{ padding: 12px 0; text-align: center;}
 .organization .trigger_icons a 	{ display: inline-block; height: 40px; width: 40px; margin: 5px; border-radius: 20px; 
 									border: solid 1px #ccc; line-height: 40px; text-align: center; font-size: 16px}
+.organization .trigger_icons img { width: 40px; }
+
 .organization .orgDescription 	{ font-size: 12px; text-align: center; }
 .organization .factoid 			{ padding-top: 25px; text-align: center; font-size: 12px }
 .organization .factoid .header	{ font-weight: bold; }

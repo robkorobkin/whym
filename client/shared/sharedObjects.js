@@ -15,6 +15,15 @@ for(var day = 1; day <= 31; day++) dictionary.days.push(day);
 dictionary.years = [];
 for(var year = 2015; year > 1915; year--) dictionary.years.push(year);
 
+var questionnaire = [
+	{
+		field : 'bio',
+		text : 'Who are you?'
+	}
+];
+
+
+
 
 
 // define shared objects - these are the backbone of the app
@@ -284,8 +293,37 @@ var sharedObjects = {
 				availability[a.day][a.time] = true;
 			});
 
+			// build output object
+			var availability_output = [];
+
+			$.each(this.days, function(i, day){
+				var hasDay = false;
+				var day_obj = { }
+
+
+				$.each($rootScope.appScope.acctController.times, function(j, time){
+					if(availability[day][time]){
+						if(!hasDay) {
+							day_obj = {
+								dayName : day,
+								times: []
+							}
+							hasDay = true;
+						}
+						day_obj.times.push(time);	
+					}
+				});
+
+				if(hasDay) {
+					day_obj.times_str = day_obj.times.join(', ');
+					availability_output.push(day_obj);
+				}
+			});
+
+
 			// save into user object
 			user.availability = availability;
+			user.availability_output = availability_output;
 			return user;
 		},
 
@@ -347,6 +385,8 @@ var sharedObjects = {
 		},
 
 		updateAvailability : function(day, time, flip){
+
+			console.log($rootScope.appScope.user)
 
 			if(flip) $rootScope.appScope.user.availability[day][time] = !($rootScope.appScope.user.availability[day][time]);
 

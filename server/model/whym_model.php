@@ -164,7 +164,7 @@
 			unset($user['organizations']);
 			unset($user['middle_name']);	// control which fields we get from facebook?
 			unset($user['availability_data']);
-			
+			unset($user['availability_output']);
 
 
 

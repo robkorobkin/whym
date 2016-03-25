@@ -5,7 +5,7 @@
 ?><!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta name="google-site-verification" content="jLu4WMzaLXi6tJ96a7vmyJFMRSA_2-LR8QwjQ-bG83U" />
+		
 		<!-- SHARED FRAMEWORK -->
 		<?php include('client/shared/head.php'); ?>
 
@@ -136,13 +136,21 @@
 							</label>
 						</div>
 						<div class="trigger_icons clearfix">
-							<a href="http://www.facebook.com/profile.php?id={{org.organizationFbId}}">F</a>
+							<a href="http://www.facebook.com/profile.php?id={{org.organizationFbId}}">
+								<img src ="client/shared/images/icon-fb.png" />
+							</a>
 
-							<a href="{{org.website}}"><i class="glyphicon glyphicon-globe"></i></a>
+							<a href="{{org.website}}"  ng-if="org.website">
+								<img src ="client/shared/images/icon-www.png" />	
+							</a>
 
-							<a href="tel://{{org.contact1_Phone}}">P</a>
+							<a href="tel://{{org.contact1_Phone}}" ng-if="org.contact1_Phone">
+								<img src ="client/shared/images/icon-Phone.png" />
+							</a>
 
-							<a href="mailto://{{org.contact1_Email}}">E</a>
+							<a href="mailto://{{org.contact1_Email}}"  ng-if="org.contact1_Email">
+								<img src ="client/shared/images/icon-email.png" />
+							</a>
 						</div>
 
 						<div class="orgDescription">{{org.organizationDescription}}</div>

@@ -15,6 +15,7 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', 'local
 
 			// set scope-level pointers to config and dictionary (for view)
 			$scope.dictionary = dictionary;
+			$scope.questionnaire = questionnaire;
 
 
 			// DIY DEPENDENCY INJECTION - NICE AND SIMPLE
@@ -74,6 +75,10 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', 'local
 
 			newlySelectedOrgId : 0,
 
+			person_search_term : '',
+
+			peopleMode : 'list',
+
 			setOrganization : function(org){
 				$scope.org = org;
 				$scope.user.lastOrganizationId = $scope.org.organizationId;
@@ -101,37 +106,31 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', 'local
 				$scope.apiClient.postData(request, function(response){
 					
 					$scope.org.people = [];
+					$scope.org.displayPeople = [];
+
 					$.each(response.people, function(index, person){
-						$scope.org.people.push($scope.acctController.loadUser(person));
+						var person = $scope.acctController.loadUser(person);
+						$scope.org.people.push(person);
+						$scope.org.displayPeople.push(person);
 					});
 
 					$scope.rootController.loadView('orgPeople');
 				});
 			},
 
+			filterPeople : function(){
+				var search_term = this.person_search_term;
+				$scope.org.displayPeople = [];
+				$.each($scope.org.people, function(index, person){
+					if(person.first_name.indexOf(search_term) != -1 || person.last_name.indexOf(search_term) != -1){
+						$scope.org.displayPeople.push(person);
+					}
+				});
+			},
+
 			openPerson : function(person){
 				$scope.person = person;
-
-				var modalInstance = $uibModal.open({
-					templateUrl:    'personTemplate.html',
-					controller: 'whymAdminCtrl_Person',
-                    resolve: {
-                        person: function () {
-                          return $scope.person;
-                        }
-                    }
-                });
-
-                modalInstance.result.then(
-                    function (person) {
-                    	// On "ok" - save person
-                        // $scope.selected = selectedItem;
-                    }, 
-                    function () {
-                    	// modal dismissed
-                    }
-                );		
-
+				$scope.rootController.loadView('person', 'questionnaire')
 			},
 
 			updateOrganization : function(){
@@ -469,23 +468,23 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', 'local
 	
 ]);
 
-app.controller('whymAdminCtrl_Person', ['$scope', '$uibModalInstance', 'person',
-	function($scope, $uibModalInstance, person){
-		console.log(person);
-		$scope.person = person;
+// app.controller('whymAdminCtrl_Person', ['$scope', '$uibModalInstance', 'person',
+// 	function($scope, $uibModalInstance, person){
+// 		console.log(person);
+// 		$scope.person = person;
 
-		$scope.banana = "BAANANANA";
+// 		$scope.banana = "BAANANANA";
 		
-		// on "ok" - save person 
-		$scope.ok = function () {
-	        $uibModalInstance.close($scope.selected.item);
-	    };
+// 		// on "ok" - save person 
+// 		$scope.ok = function () {
+// 	        $uibModalInstance.close($scope.selected.item);
+// 	    };
 
-	    // on "cancel" - dismiss modal
-	    $scope.cancel = function () {
-	        $uibModalInstance.dismiss('cancel');
-	    };
-	}
+// 	    // on "cancel" - dismiss modal
+// 	    $scope.cancel = function () {
+// 	        $uibModalInstance.dismiss('cancel');
+// 	    };
+// 	}
 	
-]);
+// ]);
 

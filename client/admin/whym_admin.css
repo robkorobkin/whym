@@ -82,9 +82,43 @@ input 			{ font-size: 14px !important;  }
 
 
 /* PEOPLE LIST */
+.orgPeople .top 		{ padding-top: 20px;}
+.orgPeople .top .left 	{ float: left; }
+.orgPeople .top input 	{  }
+.orgPeople .top .right 	{ float: right; }
+.orgPeople .top .pagination { margin-top: 0; }
+.orgPeople .bottom 		{ padding: 10px; border: dashed 1px #ccc; }
+.orgPeople thead 		{ font-weight: bold }
+.orgPeople thead td 	{  }
+.orgPeople tbody 		{  }
+.orgPeople tbody td 	{ padding-right: 30px; }
 .orgPeople .person 		{ text-align: center; height: 130px;}
+.orgPeople .person 		{ text-align: center; height: 130px; cursor: pointer; margin-top: 10px;}
 .orgPeople .name 		{ font-size: 10px; padding-top: 5px;}
 .orgPeople .personImg	{ max-width: 100%; border-radius: 50%; }
+
+
+/* PERSON FEATURE */
+.personFrame					{  }
+.personFrame .backBtn			{ font-size: 12px; }
+.personFrame .top 				{ margin-top: 20px; }
+.personFrame .top .left 		{ width: 250px; float: left;}
+.personFrame .personFeatureImg 	{ width: 230px; }
+.personFrame .top .right 		{ float: left; padding-top: 50px; }
+.personFrame .top .name 		{ font-weight: bold; font-size: 20px; }
+.personFrame .top .location 	{  }
+.personFrame .top .email 		{  }
+.personFrame .top .phone 		{  }
+.personFrame .nav-pills 		{ margin: 10px 0; }
+.personFrame .nav-pills li 		{  }
+.personFrame .nav-pills a 		{  }
+.personFrame .bottom 			{ border: dashed 1px #ccc; padding: 10px; }
+.personFrame .question 			{ font-weight: bold }
+.personFrame .answer 			{ margin-bottom: 15px }
+
+
+
+
 
 /* PHOTO LIST */
 .orgPhotos 					{  }
