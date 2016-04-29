@@ -26,10 +26,10 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 			$scope.view = 'loading';
 			$scope.header = {
 				show : false
-			}
+			};
 			$scope.footer = {
 				show : false
-			}
+			};
 
 
 			// set scope-level pointers to config and dictionary (for view)
@@ -56,7 +56,7 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 
 
 			// load map stuff
-//			$scope.GeoSystem = new GeoSystem($scope);
+			//	$scope.GeoSystem = new GeoSystem($scope);
 
 			
 		}
@@ -73,6 +73,21 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 
 			loadList : function(organizations){
 				$scope.orgNavigator.orgs = organizations;
+
+				var label = '';
+
+				$scope.orgNavigator.orgSets = [];
+				var index = -1;
+				$.each($scope.orgNavigator.orgs, function(index, org){
+					
+					if(index % 2 == 0) {
+						index++;
+						$scope.orgNavigator.orgSets[index] = [];
+					}
+					$scope.orgNavigator.orgSets[index].push(org);
+
+				});
+
 				$scope.rootController.loadView('list');
 			},
 
@@ -84,6 +99,8 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 				}
 
 				$scope.rootController.loadView('loading');
+				$scope.screen = 'panels';
+				$scope.pageHeader = 'Looking to volunteer?';
 
 				$scope.apiClient.postData(request, function(response){
 					$scope.orgNavigator.loadList(response.organizations);
@@ -166,7 +183,19 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 
 			changeMode : function(mode){
 				$scope.rootController.loadView('org', mode);
+			},
+
+			showSecondary : function(screen){
+				$scope.screen = screen;
+				$('.appFrame').scrollTop(0);
+				$('.organization').animate({ marginLeft: '-100%' }, 250, "linear");
+			},
+
+			showPrimary : function(){
+				$('.appFrame').scrollTop(0);
+				$('.organization').animate({ marginLeft: '0' }, 250, "linear");
 			}
+
 
 
 		}

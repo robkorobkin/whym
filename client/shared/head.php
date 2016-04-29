@@ -32,6 +32,7 @@
 <link href="client/shared/third_party/fonts/infiniti/stylesheet.css" rel="stylesheet" type="text/css" />		
 <link href='http://fonts.googleapis.com/css?family=Roboto:400,500' rel='stylesheet' type='text/css'>
 <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
 
 
 <!-- IOS STUFF -->

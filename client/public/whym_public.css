@@ -7,7 +7,7 @@
 */
 html 			{ height: 100%; }
 
-body			{ 	margin: 0; font-family: 'Open Sans', sans-serif;  background: #e9eaed; 
+body			{ 	margin: 0; font-family: 'Droid Sans', sans-serif; background:  #395693; 
 					display: flex; flex-direction: column; height: 100%; overflow: hidden; width: 100%; ;}
 a				{ cursor: pointer; border: none !important;}
 img				{ display: block; }
@@ -51,6 +51,10 @@ a:focus, button:focus {
 .loadingMain img 			{ display: block; width: 200px; margin: 0px auto; }
 
 
+/* HEADERS */
+.header 		{ text-shadow: 1px 1px black; font-size: 18px; text-align: center; padding: 15px 0 10px; font-weight: bold; color: white; }
+
+
 /* LOGIN */
 .loginFrame 			{  }
 .loginMain 				{ 	position: fixed;  height: 100px; top: 50%; margin-top: -50px;
@@ -77,7 +81,7 @@ a:focus, button:focus {
 
 /* MAIN CONTENT */
 .appFrame 				{ flex: 1 1 0;  }
-.mainContent 			{ max-width: 500px; margin: 0 auto;}
+.mainContent 			{ max-width: 500px; margin: 0 auto; background: white; overflow: hidden;}
 .primaryFrame			{ padding: 16px 16px 0;}
 .primaryFrame h2		{ margin-top: 0; font-weight: normal; }
 
@@ -117,26 +121,52 @@ a:focus, button:focus {
 .orgResult .inboxCount	{ background: red; height: 30px; line-height: 30px; width: 30px; text-align: center; color: white; border-radius: 15px; font-size: 13px; margin-right: 10px }
 
 
+
+/* RESULTS PANEL */
+.orgPanels 					{ text-align: center; padding-top: 10px; }
+.orgPanels img 				{ width: 100px; height: 100px; border-radius: 50px; display: inline-block; margin-bottom: 10px }
+.orgPanels .name			{ font-size: 12px;  }
+.orgPanels .orgFrame 		{ }
+.orgPanels .panel 			{ cursor: pointer; border-radius: 12px; }
+.orgPanels .panel:hover 	{ background: #f0f0f0; }
+
+
+
 /* ORGANIZATION */
-.organization 					{  }
-.organization .header			{ text-align: center; }
-.organization .orgTitle 		{ font-family: 'infiniregular',Helvetica,Arial,sans-serif; font-size: 20px; line-height: 32px }
-.organization .imgFrame			{ text-align: center; }
-.organization .imgFrame	img		{ height: 100px; width: 100px; display: inline-block; border-radius: 50px; }
-.organization .togglebutton 	{ font-size: 11px; text-align: center; color: #aaa; padding-top: 15px;}
-.organization .toggledOn 		{ color: black;}
-.organization .togglebutton label .toggle { margin: 0; }
+.organization 					{ width: 200%;}
+.bottom_layer 					{ width: 50%; float: left; }
+.top_layer 						{ width: 50%; float: left; }
 
-.organization .trigger_icons 	{ padding: 12px 0; text-align: center;}
-.organization .trigger_icons a 	{ display: inline-block; height: 40px; width: 40px; margin: 5px; border-radius: 20px; 
-									border: solid 1px #ccc; line-height: 40px; text-align: center; font-size: 16px}
-.organization .trigger_icons img { width: 40px; }
 
-.organization .orgDescription 	{ font-size: 12px; text-align: center; }
-.organization .factoid 			{ padding-top: 25px; text-align: center; font-size: 12px }
-.organization .factoid .header	{ font-weight: bold; }
-.organization .factoid .value	{  }
-.organization .factoid .link	{ display: block; }
+
+
+.orgHeader						{ }
+.orgHeader .toggleFrame 		{ width: 25%; float: left; text-align: center;}
+.orgHeader .toggle				{ width: 40px; height: 40px; border-radius: 20px; border: solid 1px black !important; display: block; padding: 4px; display: inline-block;}
+.orgHeader .dot 				{ width: 30px; height: 30px; border-radius: 15px;  }
+.orgHeader .reject .dot 		{ background: red; }
+.orgHeader .accept .dot 		{ background: green; }
+.orgHeader .imageFrame 			{ width: 50%; float: left; text-align: center; padding: 15px;}
+.orgHeader img					{ display: inline-block; width: 100%; border-radius: 50%; }
+
+.organization .orgTitle 		{ font-size: 20px; line-height: 32px; font-weight: bold; padding-bottom: 0 }
+
+.orgDivTitle 					{ font-weight: bold; padding-bottom: 5px; }
+.orgDiv 						{ line-height: 24px; padding: 20px 15px; border-bottom: solid 1px #ddd }
+.orgDiv:last-child 				{ border: none; }
+.orgDiv.description 			{ padding-top: 0 }
+.orgTitle 						{ border-bottom: none }
+
+.orgDiv.photos img 				{ width: 100%; max-width: 400px }
+
+.read_more 						{ color: #ff5a5f; padding-top: 5px; }
+
+.linkFrame 						{ padding: 10px 0; border-bottom: dashed 1px #ccc; }
+
+.organization .contactInfo 		{ font-size: 14px; color: black;}
+.organization .contactInfo a	{ display: block; padding: 10px 0; }
+.organization .photo			{ margin: 10px 0; }
+.organization .photo img		{ max-width: 100% }
 
 
 
