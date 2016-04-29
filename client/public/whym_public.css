@@ -81,7 +81,7 @@ a:focus, button:focus {
 
 /* MAIN CONTENT */
 .appFrame 				{ flex: 1 1 0;  }
-.mainContent 			{ max-width: 500px; margin: 0 auto; background: white; overflow: hidden;}
+.mainContent 			{ max-width: 500px; margin: 0 auto; overflow: hidden;}
 .primaryFrame			{ padding: 16px 16px 0;}
 .primaryFrame h2		{ margin-top: 0; font-weight: normal; }
 
@@ -133,7 +133,7 @@ a:focus, button:focus {
 
 
 /* ORGANIZATION */
-.organization 					{ width: 200%;}
+.organization 					{ width: 200%; background: white; }
 .bottom_layer 					{ width: 50%; float: left; }
 .top_layer 						{ width: 50%; float: left; }
 

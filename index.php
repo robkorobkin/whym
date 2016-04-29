@@ -208,8 +208,6 @@
 
 
 						<!-- CONTACT PERSON: ToDo: Link administrator account to organization -->
-
-
 					</div><!-- END BOTTOM LAYER -->
 
 
@@ -271,6 +269,9 @@
 							<div class="caption" ng-if="photo.caption != ''">{{photo.caption}}</div>
 						</div>
 					</div>
+
+
+					<div style="clear: both"></div>
 
 				</div>
 

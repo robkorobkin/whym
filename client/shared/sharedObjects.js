@@ -113,14 +113,14 @@ var sharedObjects = {
 				}							
 			}
 			else {
-				if(parseInt($rootScope.appScope.user.isNew)){
+				var user = $rootScope.appScope.user;
+
+				if(parseInt(user.isNew)){
 					this.loadView('account', 1);
 				}
 				else {
-					console.log($rootScope.appScope.user);
-
-					// deep load
-					$rootScope.appScope.orgNavigator.loadList($rootScope.appScope.user.organizations);
+					orgs = ('organizations' in user) ? user.organizations : [];
+					$rootScope.appScope.orgNavigator.loadList(orgs);
 				}
 			}
 
