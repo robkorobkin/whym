@@ -74,17 +74,28 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 			loadList : function(organizations){
 				$scope.orgNavigator.orgs = organizations;
 
+
+				switch(this.search_parameters.mode){
+					case 'mine' : 
+						$scope.pageHeader = 'My Organizations';
+						break;
+					case 'searchNew' : 
+						$scope.pageHeader = 'Looking to volunteer?';
+						break;
+				}
+				
+
 				var label = '';
 
 				$scope.orgNavigator.orgSets = [];
-				var index = -1;
+				var setNumber = -1;
 				$.each($scope.orgNavigator.orgs, function(index, org){
 					
-					if(index % 2 == 0) {
-						index++;
-						$scope.orgNavigator.orgSets[index] = [];
+					if(index % 3 == 0) {
+						setNumber++;
+						$scope.orgNavigator.orgSets[setNumber] = [];
 					}
-					$scope.orgNavigator.orgSets[index].push(org);
+					$scope.orgNavigator.orgSets[setNumber].push(org);
 
 				});
 
@@ -100,7 +111,7 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 
 				$scope.rootController.loadView('loading');
 				$scope.screen = 'panels';
-				$scope.pageHeader = 'Looking to volunteer?';
+				
 
 				$scope.apiClient.postData(request, function(response){
 					$scope.orgNavigator.loadList(response.organizations);
@@ -114,6 +125,11 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 
 		}
 		
+
+
+
+
+
 		$scope.orgController = {
 			openOrg : function(org){
 				var request = {
@@ -144,21 +160,41 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 			},
 
 			loadOrg : function(org){
+
 				// figure out if the user has "signed up" for the organization
-				org.signup = {
-					signedup : (org.status == "signed up" || org.status == "admin")
+				org.signup.signedup = (org.signup.status == "signed up" || org.signup.status == "admin");
+				
+
+				// BUILD FEATURED PHOTOS OBJECT
+				if(isMobile){
+					org.featuredPhotos = [org.photos[0]];
 				}
+				else {
+					var pList = [];
+					for(var i = 0; i < 4; i++){
+						if(i in org.photos){
+							pList.push(org.photos[i]);
+						}
+					}
+					org.featuredPhotos = pList;
+				}
+
 
 				// update the global pointer to the new organization
 				$scope.org = org;
+				$scope.update = org.updates[0];
+
+				
 
 
 				// load the view - maybe add some logic here?
 				var screen = 'info';
 				$scope.rootController.loadView('org', screen);
+				this.showPrimary();
 			},
 
-			toggleSignup : function(flip){
+			toggleSignup : function(){
+				
 				
 				// don't toggle status if user is an administrator
 				if($scope.org.status == "admin"){
@@ -168,8 +204,7 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 
 
 				// if we got here from clicking the label, flip the switch
-				if(flip) $scope.org.signup.signedup = !($scope.org.signup.signedup);
-
+				$scope.org.signup.signedup = !($scope.org.signup.signedup);
 
 				// and fire the API!
 				var request = {
@@ -177,8 +212,26 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 				 	verb : 'toggleSignup'
 				}
 				$scope.apiClient.postData(request, function(response){
-					logger(response);
-				});
+
+					var new_list = [];
+					$.each($scope.user.organizations, function(i, o){
+						if(response.status == 'signed up' || o.organizationId != $scope.org.organizationId){
+							new_list.push(angular.copy(o));
+						}
+					});
+					if(response.status == 'signed up'){
+						new_list.push($scope.org);
+					}
+					new_list.sort(function(a,b){
+					 	return a.organizationName > b.organizationName;
+					})
+
+
+					$scope.user.organizations = new_list;
+
+
+				});	
+				
 			},
 
 			changeMode : function(mode){
@@ -205,4 +258,10 @@ app.controller('whymCtrl', ['$scope', '$http', '$sce', '$rootScope', '$window', 
 
 	}
 	
-]);
+])
+.directive('orgupdate', function() {
+  return {
+    restrict: 'E',
+    templateUrl: 'org_update.html'
+  };
+});

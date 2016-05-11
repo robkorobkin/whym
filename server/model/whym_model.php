@@ -293,6 +293,11 @@
 			$organization = $this -> db -> get_row($sql);
 			if(!$organization) $this -> handleError("Sorry.  No organization found for that ID");
 
+			// get signup status
+			$sql = 'SELECT * FROM signups where organizationId=' . $orgId . ' AND uid=' . $this -> uid;
+			$signup = $this -> db -> get_row($sql);
+			$organization['signup'] = (count($signup) != 0) ? $signup : array('status' => 'none');
+			
 			// get photos
 			$sql = 'SELECT * FROM photos where orgId=' . $orgId;
 			$organization['photos'] = $this -> db -> get_results($sql);

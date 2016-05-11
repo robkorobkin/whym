@@ -1,5 +1,12 @@
 
 
+// IS MOBILE
+$(function(){
+	isMobile = ($(window).width() < 768);
+})
+
+
+
 // SAFE LOGGER
 function logger(message){
 	if('console' in window && 'log' in console){
@@ -119,8 +126,10 @@ var sharedObjects = {
 					this.loadView('account', 1);
 				}
 				else {
-					orgs = ('organizations' in user) ? user.organizations : [];
-					$rootScope.appScope.orgNavigator.loadList(orgs);
+					if('organizations' in user){
+						var orgs = user.organizations;
+						$rootScope.appScope.orgNavigator.loadList(orgs);
+					} 
 				}
 			}
 

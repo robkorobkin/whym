@@ -7,7 +7,7 @@
 */
 html 			{ height: 100%; }
 
-body			{ 	margin: 0; font-family: 'Droid Sans', sans-serif; background:  #395693; 
+body			{ 	margin: 0; font-family: 'Droid Sans', sans-serif; background:  #e9eaed; 
 					display: flex; flex-direction: column; height: 100%; overflow: hidden; width: 100%; ;}
 a				{ cursor: pointer; border: none !important;}
 img				{ display: block; }
@@ -23,14 +23,25 @@ a:focus, button:focus {
 }
 
 
-
+/* SCROLL FIX */
 .scrollable{min-height:0;-webkit-box-flex:1;box-flex:1;-webkit-flex:1;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 @media only screen and (min-device-width: 768px) {
 	.scrollable {
 		overflow-y: scroll;		
 	}
-
 }
+
+
+/* MAIN CONTENT */
+.appFrame 				{ flex: 1 1 0;  }
+.mainContent 			{ max-width: 500px; margin: 0 auto; overflow: hidden; min-height: 100%; border-left: solid 1px #ccc; border-right: solid 1px #ccc; background: white; }
+.primaryFrame			{ padding: 16px 16px 0;}
+.primaryFrame h2		{ margin-top: 0; font-weight: normal; }
+
+
+
+
+
 
 
 .pagination > .active > a, .pagination > .active > a:focus, .pagination > .active > a:hover, .pagination > .active > span, 
@@ -52,7 +63,7 @@ a:focus, button:focus {
 
 
 /* HEADERS */
-.header 		{ text-shadow: 1px 1px black; font-size: 18px; text-align: center; padding: 15px 0 10px; font-weight: bold; color: white; }
+.header 				{ font-size: 18px; text-align: center; padding: 15px 0 10px; font-weight: bold; color: #565a5c; }
 
 
 /* LOGIN */
@@ -69,7 +80,7 @@ a:focus, button:focus {
 
 /* FOOTER */
 .footer						{ display: flex; flex-direction: row; height: 45px; line-height: 32px; width: 100%; 
-								background: #eee; color: #777; font-size: 18px; margin: 0;}
+								background: #eee; color: #777; font-size: 18px; margin: 0; }
 .footer_nav					{ width: 100%; max-width: 500px; margin: 0px auto; }
 .footer .link:first-child 	{ border-left: none; }
 .footer .link 				{ text-align: center; cursor: pointer; border-left: dashed 1px #ccc; height: 45px; width: 33%; float: left;}
@@ -79,14 +90,9 @@ a:focus, button:focus {
 .footer .link.active		{ color: #3b5998 !important; }
 .footer .link.active div	{ color: #3b5998 !important; }
 
-/* MAIN CONTENT */
-.appFrame 				{ flex: 1 1 0;  }
-.mainContent 			{ max-width: 500px; margin: 0 auto; overflow: hidden;}
-.primaryFrame			{ padding: 16px 16px 0;}
-.primaryFrame h2		{ margin-top: 0; font-weight: normal; }
 
 /* EDIT ACCOUNT */
-.accountFrame		{ padding: 15px; }
+.accountFrame		{ padding: 15px; max-width: 500px; margin: 0 auto;}
 #user_bio 			{ display: block; width: 100%; height: 205px; font-size: 12px;}
 
 
@@ -140,35 +146,36 @@ a:focus, button:focus {
 
 
 
-.orgHeader						{ }
-.orgHeader .toggleFrame 		{ width: 25%; float: left; text-align: center;}
-.orgHeader .toggle				{ width: 40px; height: 40px; border-radius: 20px; border: solid 1px black !important; display: block; padding: 4px; display: inline-block;}
-.orgHeader .dot 				{ width: 30px; height: 30px; border-radius: 15px;  }
-.orgHeader .reject .dot 		{ background: red; }
-.orgHeader .accept .dot 		{ background: green; }
-.orgHeader .imageFrame 			{ width: 50%; float: left; text-align: center; padding: 15px;}
-.orgHeader img					{ display: inline-block; width: 100%; border-radius: 50%; }
+.orgHeader						{ border-bottom: none}
+.organization .orgTitle 		{ float: left; font-size: 20px; line-height: 40px; font-weight: bold; padding-bottom: 0 }
+.orgHeader .orgToggle 			{ float: right; }
+.orgHeader .star 				{ height: 40px; width: 40px; background: url("../client/shared/images/stars.jpg") -37px 0; }
+.orgHeader .star.active 		{ background-position: 0 0; }
 
-.organization .orgTitle 		{ font-size: 20px; line-height: 32px; font-weight: bold; padding-bottom: 0 }
+
+.orgImgFrame		 			{ text-align: center; padding-top: 15px; width: 120px;}
+.organizationImg				{ display: inline-block; width: 100%; border-radius: 50%; }
+.orgDiv .description 			{ padding-top: 30px; }
+
 
 .orgDivTitle 					{ font-weight: bold; padding-bottom: 5px; }
 .orgDiv 						{ line-height: 24px; padding: 20px 15px; border-bottom: solid 1px #ddd }
 .orgDiv:last-child 				{ border: none; }
-.orgDiv.description 			{ padding-top: 0 }
 .orgTitle 						{ border-bottom: none }
 
 .orgDiv.photos img 				{ width: 100%; max-width: 400px }
 
-.read_more 						{ color: #ff5a5f; padding-top: 5px; }
+.read_more 						{ color: #ff5a5f; padding-top: 5px; cursor: pointer;}
 
 .linkFrame 						{ padding: 10px 0; border-bottom: dashed 1px #ccc; }
+.linkFrame:last-child 			{ border-bottom: none; }
 
 .organization .contactInfo 		{ font-size: 14px; color: black;}
 .organization .contactInfo a	{ display: block; padding: 10px 0; }
-.organization .photo			{ margin: 10px 0; }
-.organization .photo img		{ max-width: 100% }
+.organization .photo			{ margin: 10px 15px 10px 0; float: left }
 
 
+.backHeader 	{ text-align: left; padding: 20px 20px 0; }
 
 /* SEACH */
 .form-group 	{ margin-top: 0;}
@@ -195,7 +202,7 @@ label .toggle:nth-child(3) { display: none;}
 
 /* UPDATES */
 .updateList 				{  }
-.updateList .update 		{ padding: 8px; position: relative; margin-bottom: 15px; background: white; display: block;}
+.updateList .update 		{ padding: 8px; position: relative; margin-bottom: 15px; background: #f5f5f5; display: block; border: dotted 1px  #329f66; float: left;}
 .updateList .topLine		{ padding-bottom: 8px }
 .updateList .date			{ color: #9197a3; font-size: 11px; float: left; }
 .updateList .utilities		{ float: right; color: #9197a3; font-size: 12px;}
@@ -204,8 +211,9 @@ label .toggle:nth-child(3) { display: none;}
 .updateList .title 			{ font-weight: bold; font-size: 13px; margin-bottom: 3px}
 
 .updateList .body 						{ font-size: 12px; padding-bottom: 5px }
-.updateList .event 						{ padding-top: 15px; margin-top: 15px; border-top: dashed 1px #ccc; color: black; display: block;}
-.updateList .event .imgFrame 			{ padding-right: 10px; width: 70px; float: left;}
+.updateList .event 						{ padding-top: 15px; margin: 7px; border: solid 1px #ccc; color: black; display: block; line-height: 18px; background: white;}
+.updateList .event .imgFrame 			{ padding-right: 10px; width: 70px; float: left; padding-top: 10px;}
+
 .updateList .event img 					{ width: 100%; height: auto; }
 .updateList .event .event_details 		{ float: left; }
 .updateList .event .location			{ font-size: 12px;}
@@ -218,5 +226,171 @@ label .toggle:nth-child(3) { display: none;}
 .photoList .photo img	{ max-width: 100%; max-height: 300px; display: inline-block; }
 .photoList .caption		{ font-size: 12px; padding-top: 5px }
 
+.orgSidebar {
+	display: none;
+}
+.desktopHeader {
+	display: none;
+}
 
 
+/* DESKTOP */
+@media only screen and (min-width: 768px) {
+	.mainContent {
+		width: 100%;
+		max-width: 995px;
+		padding: 0 25px;
+		border: none;
+		background: none
+	}
+
+	.header {
+		font-size: 32px;
+		margin-bottom: 15px;
+		margin-top: 50px;
+		font-weight: normal;
+	
+	}
+	.footer {
+		display: none
+	}
+
+	.desktopHeader	{ 
+		display: flex; flex-direction: row; height: 45px; line-height: 32px; width: 100%; 
+		background: #329f66; color: white; font-size: 18px; margin: 0; 
+		border-bottom: solid 1px #ccc;
+		/*-webkit-box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.82);
+		-moz-box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.82);
+		box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.82);*/
+	}
+
+
+	.desktopHeader	.logo { 
+		line-height: 45px;
+		font-weight: bold;
+		float: left;
+	}
+
+	.desktopHeader .menu {
+		float: right;
+		line-height: 45px;
+	}
+
+	.desktopHeader .link {
+		display: inline-block;
+		padding: 0 7px;
+		cursor: pointer;
+	}	
+
+
+
+	.orgListing.panel {
+		position: relative;
+		height: 206px;
+		width: 206px;
+		padding: 0
+	}
+
+	.orgListing img {
+		width: 100%;
+		height: 100%;
+		border-radius: 0px;
+		z-index: 0;
+	}
+
+	.orgListing .name {
+		font-size: 13px
+	}
+
+	/*
+	.orgListing .screen {
+		position: absolute;
+		z-index: 2;
+		left: 0px;
+		top: 0px;
+		width: 100%;
+		height: 100%;
+		background: black; 
+		opacity: .6;
+	}
+	.orgListing .name {
+		position: absolute;
+		z-index: 3;
+		text-shadow: 2px 2px black; font-size: 18px; text-align: center; padding: 15px 0 10px; font-weight: bold; color: white; 
+		bottom: 5%;
+		left: 5%;
+		right: 5%;
+		width: 90%;
+		padding: 10px;
+		border: solid 1px black;
+	}
+	.orgListing .nameText {
+		position: relative;
+		z-index: 5
+	}*/
+
+	.orgSidebar {
+		display: block;
+		width: 200px;
+		float: left;
+		padding-top: 80px;
+	}
+
+	.orgSidebar .title {
+		font-weight: bold;
+		color: #666;
+	}
+
+	.orgSidebar .list {
+	}
+
+	.orgSidebar .listItem {
+		padding: 10px 0;
+		border-bottom: dashed 1px #666;
+		cursor: pointer;
+	}
+
+	.orgSidebar .listItem:hover {
+		text-decoration: underline;
+	}
+
+	.orgSidebar .listItem.active {
+		color: #329f66;
+	}
+
+	.orgSidebar .listItem:last-child {
+		border-bottom: none;
+	}
+
+
+	.orgSidebar .list .name {
+		font-size: 12px;
+	}
+
+
+
+	.orgOuterContainer 	{ 
+		width: 700px; overflow: hidden; float: right; margin: 20px 0 100px;
+		border: solid 1px #ccc;
+		/*border-left: solid 1px #ccc; border-right: solid 1px #ccc; border-bottom: solid 1px #ccc;*/
+	}
+	.orgImgFrame {
+		width: 33%;
+	}
+	.orgImgFrame img {
+		border-radius: 0;
+		padding: 1px;
+		border: solid 1px #ccc
+	}
+
+	.orgDiv .photo img {
+		height: 140px;
+		width: auto
+	}
+
+	.photoList .photo {
+		padding: 20px 0 0 20px;
+		margin: 0;
+	}
+
+}

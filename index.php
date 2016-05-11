@@ -17,7 +17,31 @@
 	
 	<body  ng-app="whymApp" ng-controller="whymCtrl">
 		
-		
+		<!-- DESKTOP HEADER -->
+		<div class="desktopHeader">
+			<div class="inner clearfix mainContent">
+				<div class="logo">WHYM</div>
+				<div class="menu">
+					<div class="link search" ng-click="orgNavigator.searchForOrganizations()"
+						ng-class="{active : currentComponent == 'search'}">
+						<i class="glyphicon glyphicon-search"></i>
+					</div>
+
+
+					<div class="link browse" ng-click="orgNavigator.getMyOrganizations()"
+						ng-class="{active : view == 'feed' && feedController.mode == 'feed' && (screen == 'feed' || screen == 'empty')}">
+						<i class="glyphicon glyphicon-globe"></i>
+					</div>
+
+					<div class="link account" ng-click="rootController.loadView('account', 'menu')"
+						ng-class="{active : currentComponent == 'account'}">
+						<i class="glyphicon glyphicon-user"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
 		<!-- INTERNAL APP FRAME -->
 		<div class="appFrame scrollable" >
 		
@@ -74,9 +98,8 @@
 
 
 
-				<!-- SEARCH RESULTS -->
+				<!-- SEARCH RESULTS: ONLY ONE LIST VIEW FOR NOW -->
 				<div ng-if="view == 'search_results'">
-							
 				</div>
 
 
@@ -97,10 +120,15 @@
 					<div class="orgPanels clearfix">
 
 						<div ng-repeat="orgSet in orgNavigator.orgSets" class="clearfix">
-							<div class="col-sm-6 orgFrame" ng-repeat="org in orgSet" >
-								<div  ng-click="orgController.openOrg(org)" class="panel panel-default">
-									<img ng-src="//graph.facebook.com/{{org.organizationFbId}}/picture" />
-									<div class="name">{{org.organizationName}}</div>
+							<div class="col-sm-3 orgFrame" ng-repeat="org in orgSet" >
+								<div  ng-click="orgController.openOrg(org)" class="panel panel-default orgListing">
+									<img ng-src="//graph.facebook.com/{{org.organizationFbId}}/picture?height=268&width=268" />
+									
+									<div class="name">
+										<div class="screen"></div>
+										<div class="nameText">{{org.organizationName}}</div>
+									</div>
+
 									<div ng-if="org.newUpdates && org.newUpdates != 0" class="inboxCount">{{org.newUpdates}}</div>
 								</div>
 							</div>
@@ -115,164 +143,144 @@
 
 
 				<!-- ORG -->
-				<div ng-if="view == 'org'" class="organization">
+				<div ng-if="view == 'org'">
 
-					<div class="bottom_layer">
-						<div class="orgHeader clearfix">
-							
-							<div class="toggleFrame">
-								<a ng-click="orgController.reject()" class="toggle reject" ng-class="{active : org.signup.signedup}">
-									<div class="dot"></div>
-								</a>
-							</div>
-
-							<div class="imageFrame">
-								<img ng-src="//graph.facebook.com/{{org.organizationFbId}}/picture?height=268&width=268" class="organizationImg" />
-							</div>
-
-							<div class="toggleFrame">
-								<a ng-click="orgController.signup()" class="toggle accept" ng-class="{active : !org.signup.signedup}">
-									<div class="dot"></div>
-								</a>
-							</div>
-						</div>
-
-						<div class="orgTitle orgDiv">{{org.organizationName}}</div>
-
-						<!-- ORG DESCRIPTION -->
-						<div class="description orgDiv">{{org.organizationDescription}}
-							<div ng-if="org.addtlDescription" ng-click="orgController.showFullDescription()" id="fullDescriptionTrigger">Read more</div>
-							<span style="display: none" id="organizationFullDescription">{{org.fullDescription}}</span>
-						</div>
-
-
-						<!-- UPDATES -->
-						<div class="updates orgDiv">
-							<div class="orgDivTitle">Updates</div>
-							I AM AN UPDATE
-							<div ng-click="orgController.showSecondary('updates')" class="read_more">Read more</div>
-						</div>
-
-
-						<!-- PHOTOS -->
-						<div class="photos orgDiv" ng-if="org.photos.length != 0">
-							<div class="orgDivTitle">Photos</div>
-							<div class="photo">
-								<img ng-src="//graph.facebook.com/{{org.photos[0].photoFbId}}/picture" />
-								<div class="caption" ng-if="org.photos[0].caption != ''">{{org.photos[0].caption}}</div>
-							</div>
-							<div ng-if="org.photos.length > 1" ng-click="orgController.showSecondary('photos')" class="read_more">View more</div>
-						</div>
-
-
-						<!-- CONTACT LINKS -->
-						<div class="contact orgDiv">
-							
-							<!-- WEBSITE -->
-							<div class="linkFrame" ng-if="org.website">
-								<!-- GLOBE ICON -->
-								<a href="{{org.website}}"  target="_blank">{{org.website}}</a>
-							</div>
-
-							<!-- FACEBOOK -->
-							<div class="linkFrame">
-								<!-- FACEBOOK ICON -->
-								<a href="http://www.facebook.com/profile.php?id={{org.organizationFbId}}"  target="_blank">View Facebook Page</a>
-							</div>							
-
-							<!-- EMAIL -->
-							<div class="linkFrame" ng-if="org.orgEmail">
-								<!-- MAIL ICON -->
-								<a href="{{org.orgEmail}}"  target="_blank">{{org.orgEmail}}</a>
-							</div>
-
-							
-							<!-- PHONE -->
-							<div class="linkFrame" ng-if="org.orgPhone">
-								<!-- PHONE ICON -->
-								<a>{{org.orgPhone}}</a>
-							</div>
-
-							<!-- MAIL -->
-							<div class="address orgDiv linkFrame" ng-if="org.address1">
-								<div class="address" style="text-transform: uppercase;">{{org.address1}}
-									<span ng-if="org.address2 != ''">- {{org.address2}}</span>
-									<br />{{org.city}}, {{org.state}} {{org.zip}}
-								</div>
-							</div>
-
-						</div>
-
-
-						
-
-
-						<!-- CONTACT PERSON: ToDo: Link administrator account to organization -->
-					</div><!-- END BOTTOM LAYER -->
-
-
-					<!-- RENDER OFF SCREEN - SLIDE OVER WHEN YOU WANT IT -->
-					<div class="updateList top_layer" ng-if="screen == 'updates'">
-						<a ng-click="orgController.showPrimary()">BACK</a>
-						<div ng-repeat="update in org.updates" class="orgDiv">
-
-							<!-- DEFAULT -->
-							<div class="update clearfix" id="update_{{update.updateId}}" ng-if="!update.event">
-								<div class="topLine clearfix">
-									<div class="date">{{update.publish_date}}</div>
-								</div>
-
-								<div class="title">{{update.title}}</div>
-								<div class="body" >
-									<span ng-bind-html="update.trustedHtml"></span>
-									<span ng-if="update.url != ''"> - 
-										<a href="{{update.url}}" target="_blank">LINK</a>
-									</span>
-								</div>	
-							</div>
-
-							<!-- IF IT'S AN EVENT -->
-							<div ng-if="update.event">
-								<a class="update clearfix" id="update_{{update.updateId}}"  href="{{update.event.url}}" target="_blank">
-									<div class="topLine clearfix">
-										<div class="date">{{update.publish_date}}</div>
-									</div>
-
-									<div class="title">{{update.title}}</div>
-									<div class="body" >
-										<span ng-bind-html="update.trustedHtml"></span>
-										<span ng-if="update.url != ''"> - 
-											<!-- <a href="{{update.url}}" target="_blank">LINK</a>-->
-										</span>
-									</div>
-									<div class="event standalone clearfix">
-										<div class="imgFrame" >
-											<img ng-src="//graph.facebook.com/{{update.event.event_FbId}}/picture?height=268&width=268" />
-										</div>
-										<div class="event_details">
-											<div class="title">{{update.event.event_title}}</div>
-											<div class="location">{{update.event.event_location}}</div>
-											<div class="date">{{update.event.event_dateStr}}</div>
-										</div>
-									</div>
-								</a>
+					<div class="orgSidebar">
+						<div class="title">MY ORGANIZATIONS</div>
+						<div class="list">
+							<div 	ng-repeat="organization in user.organizations" 
+									class="listItem" 
+									ng-class="{active : organization.organizationId == org.organizationId}"
+									ng-click="orgController.openOrg(organization)">
+								<div class="name">{{organization.organizationName}}</div>
 							</div>
 
 						</div>
 					</div>
-	
 
-					<div class="photoList top_layer" ng-if="screen == 'photos'">
-						<a ng-click="orgController.showPrimary()">BACK</a>
-						<div ng-repeat="photo in org.photos" class="photo">
-							<img ng-src="//graph.facebook.com/{{photo.photoFbId}}/picture" />
-							<div class="caption" ng-if="photo.caption != ''">{{photo.caption}}</div>
+					<div class="orgOuterContainer">
+						<div class="organization clearfix">
+
+							<div class="bottom_layer">
+
+								<div class="orgDiv clearfix">
+									<div class="orgHeader clearfix">
+										
+										<div class="orgTitle">{{org.organizationName}}</div> 
+
+										<div class="orgToggle">
+											<div class="star" ng-class="{active : org.signup.signedup}" ng-click="orgController.toggleSignup()"></div>
+										</div>
+										
+									</div>
+
+									<!-- ORG DESCRIPTION -->
+									<div class="clearfix row">
+
+										<div class="orgImgFrame col-md-4">
+											<img ng-src="//graph.facebook.com/{{org.organizationFbId}}/picture?height=268&width=268" class="organizationImg" />
+										</div>
+
+										<div class="description col-md-8">
+											{{org.organizationDescription}}
+											<div ng-if="org.addtlDescription" ng-click="orgController.showFullDescription()" id="fullDescriptionTrigger">Read more</div>
+											<span style="display: none" id="organizationFullDescription">{{org.fullDescription}}</span>
+										</div>
+									</div>
+								</div>
+
+								<!-- UPDATES -->
+								<div class="updates orgDiv" ng-if="org.updates.length != 0">
+									<div class="orgDivTitle">Updates</div>
+									<div class="updateList clearfix row">
+										<orgUpdate></orgUpdate>
+									</div>
+									<div ng-click="orgController.showSecondary('updates')" class="read_more">Read more</div>
+								</div>
+
+
+								<!-- CONTACT LINKS -->
+								<div class="contact orgDiv">
+									<div class="orgDivTitle">Contact</div>
+									
+									<!-- WEBSITE -->
+									<div class="linkFrame" ng-if="org.website">
+										<!-- GLOBE ICON -->
+										<a href="{{org.website}}"  target="_blank">{{org.website}}</a>
+									</div>
+
+									<!-- FACEBOOK -->
+									<div class="linkFrame">
+										<!-- FACEBOOK ICON -->
+										<a href="http://www.facebook.com/profile.php?id={{org.organizationFbId}}"  target="_blank">View Facebook Page</a>
+									</div>							
+
+									<!-- EMAIL -->
+									<div class="linkFrame" ng-if="org.orgEmail">
+										<!-- MAIL ICON -->
+										<a href="{{org.orgEmail}}"  target="_blank">{{org.orgEmail}}</a>
+									</div>
+
+									
+									<!-- PHONE -->
+									<div class="linkFrame" ng-if="org.orgPhone">
+										<!-- PHONE ICON -->
+										<a>{{org.orgPhone}}</a>
+									</div>
+
+									<!-- MAIL -->
+									<div class="address orgDiv linkFrame" ng-if="org.address1">
+										<div class="address" style="text-transform: uppercase;">{{org.address1}}
+											<span ng-if="org.address2 != ''">- {{org.address2}}</span>
+											<br />{{org.city}}, {{org.state}} {{org.zip}}
+										</div>
+									</div>
+
+								</div>
+
+
+								<!-- PHOTOS -->
+								<div class="photos orgDiv" ng-if="org.photos.length != 0">
+									<div class="orgDivTitle">Photos</div>
+									<div class="photoFrame clearfix">
+										<div class="photo" ng-repeat="photo in org.featuredPhotos">
+											<img ng-src="//graph.facebook.com/{{photo.photoFbId}}/picture" />
+											<div class="caption" ng-if="photo.caption != ''">{{photo.caption}}</div>
+										</div>
+									</div>
+									<div ng-if="org.photos.length > 1" ng-click="orgController.showSecondary('photos')" class="read_more">View more</div>
+								</div>
+
+
+								<!-- CONTACT PERSON: ToDo: Link administrator account to organization -->
+							</div><!-- END BOTTOM LAYER -->
+
+
+							<!-- RENDER OFF SCREEN - SLIDE OVER WHEN YOU WANT IT -->
+							<div class="updateList top_layer" ng-if="screen == 'updates'">
+								<div class="backHeader">
+									<a ng-click="orgController.showPrimary()">&lt; &lt; {{org.organizationName}}</a>
+								</div>
+								<div ng-repeat="update in org.updates" class="orgDiv">
+									<orgUpdate></orgUpdate>
+								</div>
+							</div>
+			
+
+							<!-- PHOTO LIST -->
+							<div class="photoList top_layer" ng-if="screen == 'photos'">
+								<div class="backHeader">
+									<a ng-click="orgController.showPrimary()">&lt; &lt; {{org.organizationName}}</a>
+								</div>
+								
+								<div ng-repeat="photo in org.photos" class="photo">
+									<img ng-src="//graph.facebook.com/{{photo.photoFbId}}/picture" />
+									<div class="caption" ng-if="photo.caption != ''">{{photo.caption}}</div>
+								</div>
+							</div>
+
 						</div>
 					</div>
-
-
-					<div style="clear: both"></div>
-
 				</div>
 
 
@@ -419,8 +427,14 @@
 				</div>
 
 				
+				<div class="desktopFooter">
+					<div></div>
+				</div>
 				
 			</div>
+
+
+
 
 		</div>
 
@@ -452,7 +466,54 @@
 		<!-- MODAL TEMPLATES -->
 		<div style="display: none;">
 
-			
+
+			<!-- EVENT TEMPLATE -->
+			<script type="text/ng-template" id="org_update.html">
+
+
+    			<!-- DEFAULT -->
+				<div class="update clearfix col-md-6" id="update_{{update.updateId}}" ng-if="!update.event">
+					<div class="topLine clearfix">
+						<div class="date">{{update.publish_date}}</div>
+					</div>
+					<div class="title">{{update.title}}</div>
+					<div class="body" >
+						<span ng-bind-html="update.trustedHtml"></span>
+						<span ng-if="update.url != ''"> - 
+							<a href="{{update.url}}" target="_blank">LINK</a>
+						</span>
+					</div>	
+				</div>
+
+				<!-- IF IT'S AN EVENT -->
+				<div ng-if="update.event" class="col-md-6">
+					<div class="update clearfix" id="update_{{update.updateId}}"  >
+						<div class="topLine clearfix">
+							<div class="date">{{update.publish_date}}</div>
+						</div>
+
+						<a class="title" href="{{update.event.url}}" target="_blank">
+							{{update.title}}
+						</a>
+						<div class="body" >
+							<span ng-bind-html="update.trustedHtml"></span>
+							<span ng-if="update.url != ''"> - 
+								<!-- <a href="{{update.url}}" target="_blank">LINK</a>-->
+							</span>
+						</div>
+						<div class="event standalone clearfix row">
+							<div class="imgFrame col-sm-4" >
+								<img ng-src="//graph.facebook.com/{{update.event.event_FbId}}/picture?height=268&width=268" />
+							</div>
+							<div class="event_details col-sm-8">
+								<div class="title">{{update.event.event_title}}</div>
+								<div class="location">{{update.event.event_location}}</div>
+								<div class="date">{{update.event.event_dateStr}}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+    		</script>
 			
 		</div>		
 
