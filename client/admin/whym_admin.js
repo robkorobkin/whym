@@ -79,6 +79,8 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', 'local
 
 			peopleMode : 'list',
 
+			selected_group : "Select a group...",
+
 			setOrganization : function(org){
 				$scope.org = org;
 				$scope.user.lastOrganizationId = $scope.org.organizationId;
@@ -93,12 +95,13 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', 'local
 				}
 				$scope.apiClient.postData(request, function(response){
 					$scope.organizationController.setOrganization(response.organization);
-					$scope.rootController.loadView('orgProfile');				
+					$scope.rootController.loadView('orgProfile');
 				});
 
 			},
 
 			getPeople : function(){
+				console.log(this.selected_group);
 				$scope.rootController.loadView('loading');
 				var request = {
 					verb : 'AdminGetPeople'
@@ -114,7 +117,9 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', 'local
 						$scope.org.displayPeople.push(person);
 					});
 
-					$scope.rootController.loadView('orgPeople');
+					$scope.org.user_groups = response.user_groups;
+
+					$scope.rootController.loadView('orgPeople', 'list');
 				});
 			},
 
@@ -125,6 +130,48 @@ app.controller('whymAdminCtrl', ['$scope', '$http', '$sce', '$rootScope', 'local
 					if(person.first_name.indexOf(search_term) != -1 || person.last_name.indexOf(search_term) != -1){
 						$scope.org.displayPeople.push(person);
 					}
+				});
+			},
+			
+			openUserGroupAdder : function(){
+				$scope.rootController.loadView('orgPeople', 'addUserGroup');
+				this.newGroup = {
+					user_group_name : ''
+				}
+				this.needs = {
+					user_group_name : false,
+					groupNameUsed : false
+				}
+			},
+
+			addUserGroup : function(){
+				if(this.newGroup.user_group_name == ''){
+					this.needs.user_group_name = true;
+					return;
+				}
+
+				// ACTIVATE WHEN USER GROUPS ARE BEING RETURNED
+				// $.each(response.user_groups, function(i, group){
+				// 	if(group.user_group_name == this.newGroup.user_group_name){
+				// 		this.needs.groupNameUsed = true;
+				// 		return
+				// 	}
+				// });
+
+				var user_group_name = this.newGroup.user_group_name;
+				var request = {
+					user_group_name: user_group_name,
+					verb: 'AdminAddUserGroup'
+				}
+				$scope.apiClient.postData(request, function(response){
+					$scope.org.user_groups = response.user_groups;
+					$.each(response.user_groups, function(i, group){
+						if(group.user_group_name == user_group_name){
+							$scope.organizationController.selected_group = group.user_group_id;		
+						}
+					});
+					this.addMembers = true;
+					$scope.rootController.loadView('orgPeople', 'list');
 				});
 			},
 

@@ -87,6 +87,12 @@ input 			{ font-size: 14px !important;  }
 .orgPeople .top input 	{  }
 .orgPeople .top .right 	{ float: right; }
 .orgPeople .top .pagination { margin-top: 0; }
+
+.user_group_controller .btn 		{ font-size: 20px; line-height: 20px; padding: 0 5px; float: left;}
+.user_group_controller select 		{ float: left; margin: 10px;}
+.user_group_controller .toggleFrame { float: left; margin-top: 7px}
+
+
 .orgPeople .bottom 		{ padding: 10px; border: dashed 1px #ccc; }
 .orgPeople thead 		{ font-weight: bold }
 .orgPeople thead td 	{  }

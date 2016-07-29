@@ -198,35 +198,71 @@
 							</ul>
 						</div>
 					</div>
+					<div class="user_group_controller clearfix">
+						<div class="title">Groups</div>
+
+						<div class="controls">
+							<a class="btn btn-raised btn-success btn-xs" ng-click="organizationController.openUserGroupAdder()">+</a>
+							<select ng-model="organizationController.selected_group">
+								<option value="Select a group...">Select a group...</option>
+								<option ng-repeat="userGroup in org.user_groups" ng-value="userGroup.user_group_id"
+										ng-selected="organizationController.selected_group == userGroup.user_group_id">{{userGroup.user_group_name}}</option>
+							</select>
+							<div class="toggleFrame">
+								<input id="AddMembers_toggle" type="checkbox" ng-model="organizationController.addMembers" />
+								<label for="AddMembers_toggle">Add Members</label>
+							</div>
+						</div>
+					</div>
 					<div class="bottom clearfix">
-						<div ng-if="org.displayPeople.length == 0">
-							<i>Sorry.  There are no people who meet the specified criteria.</i>
-						</div>
+						<div ng-if="screen == 'list'">
+							<div ng-if="org.displayPeople.length == 0">
+								<i>Sorry.  There are no people who meet the specified criteria.</i>
+							</div>
 
-						<div ng-if="organizationController.peopleMode == 'icons' && org.displayPeople.length != 0">
-							<div ng-repeat="(index, person) in org.displayPeople" class="person col-sm-2" ng-click="organizationController.openPerson(person)">
-								<img ng-src="//graph.facebook.com/{{person.fbid}}/picture?height=268&width=268" class="personImg" />
-								<div class="name">{{person.first_name}} {{person.last_name}}</div>
-							</div>	
-						</div>
+							<div ng-if="organizationController.peopleMode == 'icons' && org.displayPeople.length != 0">
+								<div ng-repeat="(index, person) in org.displayPeople" class="person col-sm-2" ng-click="organizationController.openPerson(person)">
+									<img ng-src="//graph.facebook.com/{{person.fbid}}/picture?height=268&width=268" class="personImg" />
+									<div class="name">{{person.first_name}} {{person.last_name}}</div>
+								</div>	
+							</div>
 
-						<div ng-if="organizationController.peopleMode == 'list' && org.displayPeople.length != 0">
-							<table>
-								<thead>
-									<tr>
-										<td>Name</td>
-										<td>Phone</td>
-										<td>Email</td>
-									</tr>
-								</thead>
-								<tbody>
-									<tr ng-repeat="(index, person) in org.displayPeople">
-										<td><a ng-click="organizationController.openPerson(person)">{{person.first_name}} {{person.last_name}}</a></td>
-										<td>{{person.phone}}</td>
-										<td>{{person.email}}</td>
-									</tr>
-								</tbody>
-							</table>
+							<div ng-if="organizationController.peopleMode == 'list' && org.displayPeople.length != 0">
+								<table>
+									<thead>
+										<tr>
+											<td ng-if="organizationController.addMembers"></td>
+											<td>Name</td>
+											<td>Phone</td>
+											<td>Email</td>
+										</tr>
+									</thead>
+									<tbody>
+										<tr ng-repeat="(index, person) in org.displayPeople">
+											<td ng-if="organizationController.addMembers">
+												<input type="checkbox" ng-change="organizationController.toggleMembership(index)" id="checkbox_{{index}}"/>
+											</td>
+											<td><a ng-click="organizationController.openPerson(person)">{{person.first_name}} {{person.last_name}}</a></td>
+											<td>{{person.phone}}</td>
+											<td>{{person.email}}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div ng-if="screen == 'addUserGroup'">
+							<h2>Add Group:</h2>
+							
+							<div class="form-group" style="margin: 0" ng-class="{'has-error': organizationController.needs.user_group_name}">						 
+								<label class="control-label" for="user_last_name">Group Name</label>
+								<input class="form-control" id="user_last_name" type="text" ng-model="organizationController.newGroup.user_group_name">
+							</div>
+							<div clas="has-error" ng-if="organizationController.needs.groupNameUsed">
+								That name has already been used.  Please pick another.
+							</div>
+							<div style="margin: 5px; text-align: center;">
+								<a class="btn btn-raised btn-success" ng-click="organizationController.addUserGroup()">Add</a>
+							</div>
 						</div>
 					</div>		
 				</div>

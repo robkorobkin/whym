@@ -410,21 +410,42 @@
 		}
 
 		function AdminGetPeople(){
+
+			$orgId = (int) $this -> request['organizationId'];
+
 			$sql = 	'SELECT u.*, s.status from users u, signups s ' . 
 					'where u.uid=s.uid AND (s.status="signed up" or s.status="admin")' .
-					' AND s.organizationId=' . (int) $this -> request['organizationId'];
+					' AND s.organizationId=' . $orgId;
 
 			$people = $this -> db -> get_results($sql);
 			foreach($people as $k => $person){
 				$people[$k] = $this -> _loadUser($person);
 			}
 
+			$userGroups = $this -> db -> get_FromObj(array("orgId" => $orgId), 'user_groups', true);
 
 			return array(
-				"people" => $people
-			);
+				"people" => $people,
+				"user_groups" => $userGroups
+ 			);
 		}
 		
+		function AdminAddUserGroup(){
+			$this -> validateInput(array("user_group_name"));
+			extract($this -> request);
+			$newGroup = array(
+				"orgId" => (int) $this -> request['organizationId'],
+				"user_group_name" => $user_group_name
+			);
+			$groupId = $this -> db -> insert($newGroup, 'user_groups');
+			$query = array(
+				"orgId" => (int) $this -> request['organizationId']
+			);
+			$userGroups = $this -> db -> get_FromObj($query, 'user_groups', true);
+			return array(
+				"user_groups" => $userGroups
+			);
+		}
 
 		/*************************************************************************************************
 		*	PHOTOS

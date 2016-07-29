@@ -168,6 +168,9 @@ var sharedObjects = {
 	apiClient : {
 		
 		postData : function(request, f){
+
+			console.log('hello')
+
 			if("user" in $rootScope.appScope){
 				request.uid = $rootScope.appScope.user.uid;
 				request.access_token = $rootScope.appScope.user.fbAccessToken;
